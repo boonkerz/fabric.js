@@ -93,7 +93,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
       this.__isMousedown = true;
 
       if (this.hiddenTextarea && this.canvas) {
-        this.canvas.wrapperEl.appendChild(this.hiddenTextarea);
+          fabric.document.body.appendChild(this.hiddenTextarea);
       }
 
       if (this.selected) {
@@ -264,15 +264,13 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
     if (this.flipX) {
       newSelectionStart = jlen - newSelectionStart;
     }
-
     if (newSelectionStart > this.text.length) {
       newSelectionStart = this.text.length;
     }
 
     if (j === jlen) {
-      newSelectionStart--;
+      //newSelectionStart--;
     }
-
     return newSelectionStart;
   }
 });
