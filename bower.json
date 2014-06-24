@@ -1,6 +1,6 @@
 {
   "name": "fabric.js",
-  "version": "1.4.5",
+  "version": "1.4.7",
   "homepage": "http://fabricjs.com",
   "authors": [
     "kangax", "Kienz"
@@ -11,8 +11,12 @@
     "lib",
     "src",
     "test",
-    "*.*",
-    ".*"
+    "build_all",
+    "build.js",
+    "build.sh",
+    "create_build_script.js",
+    "test.js",
+    "HEADER.js"
   ],
   "keywords": [
     "canvas",

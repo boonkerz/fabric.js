@@ -18,6 +18,10 @@
         q: 4,
         t: 2,
         a: 7
+      },
+      repeatedCommands = {
+        m: 'l',
+        M: 'L'
       };
 
   if (fabric.Path) {
@@ -154,6 +158,8 @@
     _render: function(ctx) {
       var current, // current instruction
           previous = null,
+          subpathStartX = 0,
+          subpathStartY = 0,
           x = 0, // current x
           y = 0, // current y
           controlX = 0, // current control point x
@@ -163,8 +169,7 @@
           tempControlX,
           tempControlY,
           l = -((this.width / 2) + this.pathOffset.x),
-          t = -((this.height / 2) + this.pathOffset.y),
-          methodName;
+          t = -((this.height / 2) + this.pathOffset.y);
 
       for (var i = 0, len = this.path.length; i < len; ++i) {
 
@@ -207,21 +212,17 @@
           case 'm': // moveTo, relative
             x += current[1];
             y += current[2];
-            // draw a line if previous command was moveTo as well (otherwise, it will have no effect)
-            methodName = (previous && (previous[0] === 'm' || previous[0] === 'M'))
-              ? 'lineTo'
-              : 'moveTo';
-            ctx[methodName](x + l, y + t);
+            subpathStartX = x;
+            subpathStartY = y;
+            ctx.moveTo(x + l, y + t);
             break;
 
           case 'M': // moveTo, absolute
             x = current[1];
             y = current[2];
-            // draw a line if previous command was moveTo as well (otherwise, it will have no effect)
-            methodName = (previous && (previous[0] === 'm' || previous[0] === 'M'))
-              ? 'lineTo'
-              : 'moveTo';
-            ctx[methodName](x + l, y + t);
+            subpathStartX = x;
+            subpathStartY = y;
+            ctx.moveTo(x + l, y + t);
             break;
 
           case 'c': // bezierCurveTo, relative
@@ -432,6 +433,8 @@
 
           case 'z':
           case 'Z':
+            x = subpathStartX;
+            y = subpathStartY;
             ctx.closePath();
             break;
         }
@@ -461,7 +464,7 @@
       this._setShadow(ctx);
       this.clipTo && fabric.util.clipContext(this, ctx);
       ctx.beginPath();
-
+      ctx.globalAlpha = this.group ? (ctx.globalAlpha * this.opacity) : this.opacity;
       this._render(ctx);
       this._renderFill(ctx);
       this._renderStroke(ctx);
@@ -586,12 +589,14 @@
           }
         }
 
-        var command = coordsParsed[0].toLowerCase(),
-            commandLength = commandLengths[command];
+        var command = coordsParsed[0],
+            commandLength = commandLengths[command.toLowerCase()],
+            repeatedCommand = repeatedCommands[command] || command;
 
         if (coordsParsed.length - 1 > commandLength) {
           for (var k = 1, klen = coordsParsed.length; k < klen; k += commandLength) {
-            result.push([ coordsParsed[0] ].concat(coordsParsed.slice(k, k + commandLength)));
+            result.push([ command ].concat(coordsParsed.slice(k, k + commandLength)));
+            command = repeatedCommand;
           }
         }
         else {

@@ -76,7 +76,7 @@
     else if (attr === 'visible') {
       value = (value === 'none' || value === 'hidden') ? false : true;
       // display=none on parent element always takes precedence over child element
-      if (parentAttributes.visible === false) {
+      if (parentAttributes && parentAttributes.visible === false) {
         value = false;
       }
     }
@@ -163,7 +163,7 @@
         ],
 
         // == begin transform regexp
-        number = '(?:[-+]?\\d+(?:\\.\\d+)?(?:e[-+]?\\d+)?)',
+        number = '(?:[-+]?(?:\\d+|\\d*\\.\\d+)(?:e[-+]?\\d+)?)',
 
         commaWsp = '(?:\\s+,?\\s*|,\\s*)',
 
@@ -234,6 +234,7 @@
             translateMatrix(matrix, args);
             break;
           case 'rotate':
+            args[0] = fabric.util.degreesToRadians(args[0]);
             rotateMatrix(matrix, args);
             break;
           case 'scale':
@@ -353,7 +354,9 @@
 
       if (ruleMatchesElement) {
         for (var property in fabric.cssRules[rule]) {
-          styles[property] = fabric.cssRules[rule][property];
+          var attr = normalizeAttr(property);
+          var value = normalizeValue(attr, fabric.cssRules[rule][property]);
+          styles[attr] = value;
         }
       }
     }
@@ -378,7 +381,7 @@
         // \d doesn't quite cut it (as we need to match an actual float number)
 
         // matches, e.g.: +14.56e-12, etc.
-        reNum = '(?:[-+]?\\d+(?:\\.\\d+)?(?:e[-+]?\\d+)?)',
+        reNum = '(?:[-+]?(?:\\d+|\\d*\\.\\d+)(?:e[-+]?\\d+)?)',
 
         reViewBoxAttrValue = new RegExp(
           '^' +
@@ -404,7 +407,7 @@
       var startTime = new Date(),
           descendants = fabric.util.toArray(doc.getElementsByTagName('*'));
 
-      if (descendants.length === 0) {
+      if (descendants.length === 0 && fabric.isLikelyNode) {
         // we're likely in node, where "o3-xml" library fails to gEBTN("*")
         // https://github.com/ajaxorg/node-o3-xml/issues/21
         descendants = doc.selectNodes('//*[name(.)!="svg"]');
@@ -420,7 +423,10 @@
               !hasAncestorWithNodeName(el, /^(?:pattern|defs)$/); // http://www.w3.org/TR/SVG/struct.html#DefsElement
       });
 
-      if (!elements || (elements && !elements.length)) return;
+      if (!elements || (elements && !elements.length)) {
+        callback && callback([], {});
+        return;
+      }
 
       var viewBoxAttr = doc.getAttribute('viewBox'),
           widthAttr = parseFloat(doc.getAttribute('width')),

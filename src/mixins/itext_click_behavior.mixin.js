@@ -33,6 +33,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
     this.__lastClickTime = this.__newClickTime;
     this.__lastPointer = newPointer;
     this.__lastIsEditing = this.isEditing;
+    this.__lastSelected = this.selected;
   },
 
   isDoubleClick: function(newPointer) {
@@ -92,7 +93,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
       this.__isMousedown = true;
 
       if (this.hiddenTextarea && this.canvas) {
-          document.body.appendChild(this.hiddenTextarea);
+        this.canvas.wrapperEl.appendChild(this.hiddenTextarea);
       }
 
       if (this.selected) {
@@ -144,7 +145,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
       this.__isMousedown = false;
       if (this._isObjectMoved(options.e)) return;
 
-      if (this.selected) {
+      if (this.__lastSelected) {
         this.enterEditing();
         this.initDelayedCursor(true);
       }

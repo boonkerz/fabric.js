@@ -217,25 +217,7 @@
     toSVG: function(reviver) {
       var markup = [];
 
-        if (this.clipTo && this.clipTo.type) {
-            markup.push('<clipPath ',
-                'id="canvas-clipMask">');
-            markup.push(this.clipTo.toSVG(reviver));
-            markup.push('</clipPath> ');
-        }
-
-        markup.push(
-            '<g ',
-            'id="canvas" ',
-            'style="display:inline" ');
-
-        if (this.clipTo && this.clipTo.type) {
-            markup.push('clip-path="url(#canvas-clipMask)" ');
-        }
-        markup.push('>' );
-
-
-        markup.push(
+      markup.push(
         '<g transform="', this.getSvgTransform(), '">',
           '<image xlink:href="', this.getSvgSrc(),
             '" style="', this.getSvgStyles(),
@@ -262,7 +244,6 @@
         this.fill = origFill;
       }
 
-      markup.push('</g>');
       markup.push('</g>');
 
       return reviver ? reviver(markup.join('')) : markup.join('');

@@ -160,9 +160,10 @@
         transformMatrix:  [2, 0, 0, 2, 0, 0]
       }));
 
-      var ANGLE = 90;
+      var ANGLE_DEG = 90;
+      var ANGLE = ANGLE_DEG * Math.PI / 180;
 
-      elPath.setAttribute('transform', 'rotate(' + ANGLE + ')');
+      elPath.setAttribute('transform', 'rotate(' + ANGLE_DEG + ')');
       fabric.Path.fromElement(elPath, function(path) {
 
         deepEqual(
@@ -171,6 +172,22 @@
         );
         start();
       });
+    });
+  });
+
+  asyncTest('numbers with leading decimal point', function() {
+    ok(typeof fabric.Path.fromElement == 'function');
+    var elPath = fabric.document.createElement('path');
+
+    elPath.setAttribute('d', 'M 100 100 L 300 100 L 200 300 z');
+    elPath.setAttribute('transform', 'scale(.2)');
+
+    fabric.Path.fromElement(elPath, function(path) {
+      ok(path instanceof fabric.Path);
+
+      deepEqual(path.toObject().transformMatrix, [0.2, 0, 0, 0.2, 0, 0]);
+
+      start();
     });
   });
 
@@ -190,6 +207,34 @@
         deepEqual(obj.path[1], ['c', 53.25603, 0, 96.42857, 43.17254, 96.42857, 96.42857]);
         start();
       });
+    });
+  });
+
+  asyncTest('multiple M/m coordinates converted to L/l', function() {
+    var el = getPathElement('M100 100 200 200 150 50 m 300 300 400 -50 50 100');
+    fabric.Path.fromElement(el, function(obj) {
+
+      deepEqual(obj.path[0], ['M', 100, 100]);
+      deepEqual(obj.path[1], ['L', 200, 200]);
+      deepEqual(obj.path[2], ['L', 150, 50]);
+      deepEqual(obj.path[3], ['m', 300, 300]);
+      deepEqual(obj.path[4], ['l', 400, -50]);
+      deepEqual(obj.path[5], ['l', 50, 100]);
+      start();
+    });
+  });
+
+  asyncTest('multiple M/m commands preserved as M/m commands', function() {
+    var el = getPathElement('M100 100 M 200 200 M150 50 m 300 300 m 400 -50 m 50 100');
+    fabric.Path.fromElement(el, function(obj) {
+
+      deepEqual(obj.path[0], ['M', 100, 100]);
+      deepEqual(obj.path[1], ['M', 200, 200]);
+      deepEqual(obj.path[2], ['M', 150, 50]);
+      deepEqual(obj.path[3], ['m', 300, 300]);
+      deepEqual(obj.path[4], ['m', 400, -50]);
+      deepEqual(obj.path[5], ['m', 50, 100]);
+      start();
     });
   });
 
