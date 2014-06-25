@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="34a42f27-95da-4f4d-aae3-d6da33394b74" name="Default" comment="" />
+    <list default="true" id="34a42f27-95da-4f4d-aae3-d6da33394b74" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dist/fabric.js" afterPath="$PROJECT_DIR$/dist/fabric.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dist/fabric.require.js" afterPath="$PROJECT_DIR$/dist/fabric.require.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/shapes/object.class.js" afterPath="$PROJECT_DIR$/src/shapes/object.class.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mixins/object_interactivity.mixin.js" afterPath="$PROJECT_DIR$/src/mixins/object_interactivity.mixin.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+    </list>
     <list id="909c6a61-78d0-4a12-b824-1c2ca5023601" name="Rejected commit: Default" comment="Tests" />
     <ignored path="fabric.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -23,7 +30,35 @@
     <favorites_list name="fabric" />
   </component>
   <component name="FileEditorManager">
-    <leaf />
+    <leaf>
+      <file leaf-file-name="object.class.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/shapes/object.class.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="574" column="15" selection-start="14700" selection-end="14711" vertical-scroll-proportion="0.0" vertical-offset="8928" max-vertical-offset="23456">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="group.class.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/shapes/group.class.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="331" column="26" selection-start="8507" selection-end="8507" vertical-scroll-proportion="0.0" vertical-offset="5062" max-vertical-offset="8832">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="object_interactivity.mixin.js" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/mixins/object_interactivity.mixin.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="364" column="57" selection-start="11271" selection-end="11271" vertical-scroll-proportion="-0.054131053" vertical-offset="5862" max-vertical-offset="7808">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FindManager">
     <FindUsagesManager>
@@ -38,6 +73,9 @@
       <list>
         <option value="$PROJECT_DIR$/src/mixins/itext_behavior.mixin.js" />
         <option value="$PROJECT_DIR$/src/mixins/itext_click_behavior.mixin.js" />
+        <option value="$PROJECT_DIR$/src/shapes/object.class.js" />
+        <option value="$PROJECT_DIR$/src/mixins/object_interactivity.mixin.js" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -113,7 +151,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="options.splitter.main.proportions" value="0.3" />
-    <property name="options.lastSelected" value="preferences.keymap" />
+    <property name="options.lastSelected" value="preferences.sourceCode.General" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../../../../../ecourier" />
     <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
@@ -177,12 +215,12 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="4" y="22" width="1916" height="1178" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3290441" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3290441" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Remote Host" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -190,7 +228,7 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2524013" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2524013" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -253,9 +291,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/shapes/object.class.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="574" column="15" selection-start="14700" selection-end="14711" vertical-scroll-proportion="0.0" vertical-offset="8928" max-vertical-offset="23456">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/shapes/group.class.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="331" column="26" selection-start="8507" selection-end="8507" vertical-scroll-proportion="0.0" vertical-offset="5062" max-vertical-offset="8832">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="6" selection-start="71" selection-end="71" vertical-scroll-proportion="0.11396012" vertical-offset="0" max-vertical-offset="702">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/mixins/object_interactivity.mixin.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="16" selection-start="636" selection-end="636" vertical-scroll-proportion="-0.46792454" vertical-offset="816" max-vertical-offset="7776">
+        <state line="364" column="57" selection-start="11271" selection-end="11271" vertical-scroll-proportion="-0.054131053" vertical-offset="5862" max-vertical-offset="7808">
           <folding />
         </state>
       </provider>
