@@ -414,33 +414,6 @@
      */
     _setBoundaries: function(ctx, textLines) {
       this._boundaries = [ ];
-      this._boundariesRaw = [ ];
-
-      var width = 0;
-
-        for (var i = 0, len = textLines.length; i < len; i++) {
-
-            var lineWidth = this._getLineWidth(ctx, textLines[i]);
-            if(lineWidth > width) {
-                width = lineWidth;
-            }
-        }
-
-        for (var i = 0, len = textLines.length; i < len; i++) {
-
-            var lineWidth = this._getLineWidth(ctx, textLines[i]);
-            var lineLeftOffset = 0;
-            if (this.textAlign === 'center') {
-                lineLeftOffset =  (width - lineWidth) / 4;
-            }
-            if (this.textAlign === 'right') {
-                lineLeftOffset = (width - lineWidth) /2;
-            }
-
-            this._boundariesRaw.push({
-                left: lineLeftOffset
-            });
-        }
 
       for (var i = 0, len = textLines.length; i < len; i++) {
 
@@ -967,27 +940,24 @@
       };
     },
 
-    _setSVGTextLineText: function(textLine, i, textSpans, lineHeight, lineTopOffsetMultiplier, textBgRects) {
+    _setSVGTextLineText: function(textLine, i, textSpans, lineHeight, lineTopOffsetMultiplier) {
       var lineLeftOffset = (this._boundaries && this._boundaries[i])
         ? toFixed(this._boundaries[i].left, 2)
         : 0;
 
-      var topOffset = this._getSVGLineTopOffset(i);
       textSpans.push(
         '<tspan x="',
           lineLeftOffset, '" ',
           (i === 0 || this.useNative ? 'y' : 'dy'), '="',
           toFixed(this.useNative
-            ? (topOffset)
+            ? ((lineHeight * i) - this.height / 2)
             : (lineHeight * lineTopOffsetMultiplier), 2), '" ',
           // doing this on <tspan> elements since setting opacity
           // on containing <text> one doesn't work in Illustrator
-          this._getFillAttributes(this.fil_setSVGTextLineTextl), '>',
+          this._getFillAttributes(this.fill), '>',
           fabric.util.string.escapeXml(textLine),
         '</tspan>'
       );
-
-      this.svgLineTopOffset += lineHeight;
     },
 
     _setSVGTextLineBg: function(textBgRects, i, textLeftOffset, lineHeight) {

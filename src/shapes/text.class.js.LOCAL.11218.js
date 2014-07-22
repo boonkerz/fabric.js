@@ -305,6 +305,8 @@
      */
     shadow:               null,
 
+    svgLineTopOffset: 0,
+
     /**
      * Constructor
      * @param {String} text Text string
@@ -319,6 +321,7 @@
       this.setOptions(options);
       this.__skipDimension = false;
       this._initDimensions();
+      this.setCoords();
     },
 
     /**
@@ -346,6 +349,14 @@
      */
     _render: function(ctx) {
 
+      var isInPathGroup = this.group && this.group.type === 'path-group';
+      if (isInPathGroup && !this.transformMatrix) {
+        ctx.translate(-this.group.width/2 + this.left, -this.group.height / 2 + this.top);
+      }
+      else if (isInPathGroup && this.transformMatrix) {
+        ctx.translate(-this.group.width/2, -this.group.height/2);
+      }
+
       if (typeof Cufon === 'undefined' || this.useNative === true) {
         this._renderViaNative(ctx);
       }
@@ -360,6 +371,8 @@
      */
     _renderViaNative: function(ctx) {
       var textLines = this.text.split(this._reNewline);
+
+      this.transform(ctx, fabric.isLikelyNode);
 
       this._setTextStyles(ctx);
 
@@ -501,7 +514,7 @@
      * @private
      * @param {String} method Method name ("fillText" or "strokeText")
      * @param {CanvasRenderingContext2D} ctx Context to render on
-     * @param {String} chars Chars to render
+     * @param {String} line Chars to render
      * @param {Number} left Left position of text
      * @param {Number} top Top position of text
      */
@@ -601,7 +614,7 @@
      * @param {Array} textLines Array of all text lines
      */
     _renderTextStroke: function(ctx, textLines) {
-      if ((!this.stroke || this.strokeWidth === 0) && !this._skipFillStrokeCheck) return;
+      if (!this.stroke && !this._skipFillStrokeCheck) return;
 
       var lineHeights = 0;
 
@@ -776,26 +789,22 @@
     /**
      * Renders text instance on a specified context
      * @param {CanvasRenderingContext2D} ctx Context to render on
+     * @param {Boolean} [noTransform] When true, context is not transformed
      */
     render: function(ctx, noTransform) {
       // do not render if object is not visible
       if (!this.visible) return;
 
       ctx.save();
-      this._transform(ctx, noTransform);
-
       var m = this.transformMatrix;
-      var isInPathGroup = this.group && this.group.type === 'path-group';
-      if (isInPathGroup) {
-        ctx.translate(-this.group.width/2, -this.group.height/2);
-      }
-      if (m) {
+      if (m && (!this.group || this.group.type === 'path-group')) {
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
       }
-      if (isInPathGroup) {
-        ctx.translate(this.left, this.top);
-      }
       this._render(ctx);
+      if (!noTransform && this.active) {
+        this.drawBorders(ctx);
+        this.drawControls(ctx);
+      }
       ctx.restore();
     },
 
@@ -1111,10 +1120,6 @@
       options.fontSize = fabric.Text.DEFAULT_SVG_FONT_SIZE;
     }
 
-    if (!options.originX) {
-      options.originX = 'left';
-    }
-
     var text = new fabric.Text(element.textContent, options);
 
     /*
@@ -1122,15 +1127,9 @@
         x/y attributes in SVG correspond to the bottom-left corner of text bounding box
         top/left properties in Fabric correspond to center point of text bounding box
     */
-    var offX = 0;
-    if (text.originX === 'left') {
-      offX = text.getWidth() / 2;
-    }
-    if (text.originX === 'right') {
-      offX = -text.getWidth() / 2;
-    }
+
     text.set({
-      left: text.getLeft() + offX,
+      left: text.getLeft() + text.getWidth() / 2,
       top: text.getTop() - text.getHeight() / 2
     });
 
@@ -1142,7 +1141,7 @@
    * Returns fabric.Text instance from an object representation
    * @static
    * @memberOf fabric.Text
-   * @param {Object} object Object to create an instance from
+   * @param object {Object} object Object to create an instance from
    * @return {fabric.Text} Instance of fabric.Text
    */
   fabric.Text.fromObject = function(object) {

@@ -16,7 +16,6 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
     fabric.util.addListener(this.hiddenTextarea, 'copy', this.copy.bind(this));
     fabric.util.addListener(this.hiddenTextarea, 'paste', this.paste.bind(this));
 
-
     if (!this._clickHandlerInitialized && this.canvas) {
       fabric.util.addListener(this.canvas.upperCanvasEl, 'click', this.onClick.bind(this));
       this._clickHandlerInitialized = true;
@@ -88,7 +87,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
   copy: function(e) {
     var selectedText = this.getSelectedText(),
         clipboardData = this._getClipboardData(e);
-    
+
     // Check for backward compatibility with old browsers
     if (clipboardData) {
       clipboardData.setData('text', selectedText);
@@ -107,14 +106,15 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
   paste: function(e) {
     var copiedText = null,
         clipboardData = this._getClipboardData(e);
-    
+
     // Check for backward compatibility with old browsers
     if (clipboardData) {
       copiedText = clipboardData.getData('text');
-    } else {
+    }
+    else {
       copiedText = this.copiedText;
     }
-    
+
     if (copiedText) {
       this.insertChars(copiedText);
     }
@@ -136,6 +136,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
   /**
    * @private
    * @param {Event} e Event object
+   * @return {Object} Clipboard data object
    */
   _getClipboardData: function(e) {
     return e && (e.clipboardData || fabric.window.clipboardData);
@@ -158,10 +159,11 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
 
   /**
    * Gets start offset of a selection
+   * @param {Event} e Event object
+   * @param {Boolean} isRight
    * @return {Number}
    */
   getDownCursorOffset: function(e, isRight) {
-
     var selectionProp = isRight ? this.selectionEnd : this.selectionStart,
         textLines = this.text.split(this._reNewline),
         _char,
@@ -204,7 +206,6 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
    * @private
    */
   _getIndexOnNextLine: function(cursorLocation, textOnNextLine, widthOfCharsOnSameLineBeforeCursor, textLines) {
-
     var lineIndex = cursorLocation.lineIndex + 1,
         widthOfNextLine = this._getWidthOfLine(this.ctx, lineIndex, textLines),
         lineLeftOffset = this._getLineLeftOffset(widthOfNextLine),
@@ -247,7 +248,6 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
    * @param {Event} e Event object
    */
   moveCursorDown: function(e) {
-
     this.abortCursorAnimation();
     this._currentCursorOpacity = 1;
 
@@ -268,7 +268,6 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
    * @param {Number} offset
    */
   moveCursorDownWithoutShift: function(offset) {
-
     this._selectionDirection = 'right';
     this.selectionStart += offset;
 
@@ -283,7 +282,6 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
    * @param {Number} offset
    */
   moveCursorDownWithShift: function(offset) {
-
     if (this._selectionDirection === 'left' && (this.selectionStart !== this.selectionEnd)) {
       this.selectionStart += offset;
       this._selectionDirection = 'left';
@@ -299,8 +297,12 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
     }
   },
 
+  /**
+   * @param {Event} e Event object
+   * @param {Boolean} isRight
+   * @return {Number}
+   */
   getUpCursorOffset: function(e, isRight) {
-
     var selectionProp = isRight ? this.selectionEnd : this.selectionStart,
         cursorLocation = this.get2DCursorLocation(selectionProp);
 
@@ -566,7 +568,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
 
   /**
    * Moves cursor right without keeping selection
-   * @param {Event} e
+   * @param {Event} e Event object
    */
   moveCursorRightWithoutShift: function(e) {
     this._selectionDirection = 'right';
@@ -586,6 +588,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
 
   /**
    * Inserts a character where cursor is (replacing selection if one exists)
+   * @param {Event} e Event object
    */
   removeChars: function(e) {
     if (this.selectionStart === this.selectionEnd) {
@@ -612,6 +615,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
 
   /**
    * @private
+   * @param {Event} e Event object
    */
   _removeCharsNearCursor: function(e) {
     if (this.selectionStart !== 0) {

@@ -112,6 +112,8 @@ fabric.SprayBrush = fabric.util.createClass( fabric.BaseBrush, /** @lends fabric
     }
 
     var group = new fabric.Group(rects, { originX: 'center', originY: 'center' });
+    group.canvas = this.canvas;
+
     this.canvas.add(group);
     this.canvas.fire('path:created', { path: group });
 
@@ -121,6 +123,10 @@ fabric.SprayBrush = fabric.util.createClass( fabric.BaseBrush, /** @lends fabric
     this.canvas.renderAll();
   },
 
+    /**
+     * @private
+     * @param {Array} rects
+     */
   _getOptimizedRects: function(rects) {
 
     // avoid creating duplicate rects at the same coordinates
@@ -146,7 +152,10 @@ fabric.SprayBrush = fabric.util.createClass( fabric.BaseBrush, /** @lends fabric
   render: function() {
     var ctx = this.canvas.contextTop;
     ctx.fillStyle = this.color;
+
+    var v = this.canvas.viewportTransform;
     ctx.save();
+    ctx.transform(v[0], v[1], v[2], v[3], v[4], v[5]);
 
     for (var i = 0, len = this.sprayChunkPoints.length; i < len; i++) {
       var point = this.sprayChunkPoints[i];
@@ -181,7 +190,8 @@ fabric.SprayBrush = fabric.util.createClass( fabric.BaseBrush, /** @lends fabric
         width = this.dotWidth;
       }
 
-      var point = { x: x, y: y, width: width };
+      var point = new fabric.Point(x, y);
+      point.width = width;
 
       if (this.randomOpacity) {
         point.opacity = fabric.util.getRandomInt(0, 100) / 100;

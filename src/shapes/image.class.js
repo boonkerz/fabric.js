@@ -122,7 +122,6 @@
       if (!this.visible) return;
 
       ctx.save();
-
       var m = this.transformMatrix,
           isInPathGroup = this.group && this.group.type === 'path-group';
 
@@ -140,7 +139,6 @@
         ctx.translate(this.width/2, this.height/2);
       }
 
-      ctx.save();
       this._setShadow(ctx);
       this.clipTo && fabric.util.clipContext(this, ctx);
       this._render(ctx);
@@ -149,12 +147,6 @@
       }
       this._renderStroke(ctx);
       this.clipTo && ctx.restore();
-      ctx.restore();
-
-      if (this.active && !noTransform) {
-        this.drawBorders(ctx);
-        this.drawControls(ctx);
-      }
       ctx.restore();
     },
 
@@ -176,10 +168,10 @@
      * @param {CanvasRenderingContext2D} ctx Context to render on
      */
     _renderDashedStroke: function(ctx) {
-     var x = -this.width/2,
-         y = -this.height/2,
-         w = this.width,
-         h = this.height;
+      var x = -this.width / 2,
+          y = -this.height / 2,
+          w = this.width,
+          h = this.height;
 
       ctx.save();
       this._setStrokeStyles(ctx);
@@ -339,13 +331,14 @@
      * @param {CanvasRenderingContext2D} ctx Context to render on
      */
     _render: function(ctx) {
-        this._element && ctx.drawImage(
-                           this._element,
-                           -this.width / 2,
-                           -this.height / 2,
-                           this.width,
-                           this.height
-                         );
+      this._element &&
+      ctx.drawImage(
+        this._element,
+        -this.width / 2,
+        -this.height / 2,
+        this.width,
+        this.height
+      );
     },
 
     /**

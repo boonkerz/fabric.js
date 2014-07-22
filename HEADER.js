@@ -1,6 +1,6 @@
 /*! Fabric.js Copyright 2008-2014, Printio (Juriy Zaytsev, Maxim Chernyak) */
 
-var fabric = fabric || { version: "1.4.7" };
+var fabric = fabric || { version: "1.4.9" };
 if (typeof exports !== 'undefined') {
   exports.fabric = fabric;
 }
@@ -44,3 +44,8 @@ fabric.SHARED_ATTRIBUTES = [
   "stroke-linejoin", "stroke-miterlimit",
   "stroke-opacity", "stroke-width"
 ];
+
+/**
+ * Pixel per Inch as a default value set to 96. Can be changed for more realistic conversion.
+ */
+fabric.DPI = 96;

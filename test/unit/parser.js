@@ -126,10 +126,11 @@
     var element = fabric.document.createElement('path');
     element.setAttribute('style', 'left:10px;top:22.3em;width:103.45pt;height:20%;');
 
+    // TODO: looks like this still fails with % and em values
     var expectedObject = {
       'left':   10,
       'top':    22.3,
-      'width':  103.45,
+      'width':  137.93333333333334,
       'height': 20
     };
     deepEqual(fabric.parseStyleAttribute(element), expectedObject);
@@ -187,7 +188,9 @@
 
     var expectedObject = {
       'fill': 'rgba(100,200,50,0.2)',
-      'stroke': 'rgba(0,128,0,0.5)'
+      'stroke': 'rgba(0,128,0,0.5)',
+      'fillOpacity': 0.2,
+      'strokeOpacity': 0.5
     };
     deepEqual(fabric.parseAttributes(element, fabric.Path.ATTRIBUTE_NAMES), expectedObject);
   });
@@ -196,7 +199,7 @@
     ok(fabric.parsePointsAttribute);
 
     var element = fabric.document.createElement('polygon');
-    element.setAttribute('points', '10,12           20,22,  -0.52,0.001 2.3e2,2.3e-2, 10,-1     ');
+    element.setAttribute('points', '10,  12           20 ,22,  -0.52,0.001 2.3e2,2.3e-2, 10,-1     ');
 
     var actualPoints = fabric.parsePointsAttribute(element.getAttribute('points'));
 

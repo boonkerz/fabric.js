@@ -3,14 +3,16 @@
   var clone = fabric.util.object.clone;
 
    /**
-    * IText class (introduced in <b>v1.4</b>)
+    * IText class (introduced in <b>v1.4</b>) Events are also fired with "text:"
+    * prefix when observing canvas.
     * @class fabric.IText
     * @extends fabric.Text
     * @mixes fabric.Observable
     *
-    * @fires changed ("text:changed" when observing canvas)
-    * @fires editing:entered ("text:editing:entered" when observing canvas)
-    * @fires editing:exited ("text:editing:exited" when observing canvas)
+    * @fires changed
+    * @fires selection:changed
+    * @fires editing:entered
+    * @fires editing:exited
     *
     * @return {fabric.IText} thisArg
     * @see {@link fabric.IText#initialize} for constructor definition
@@ -225,6 +227,7 @@
      */
     setSelectionStart: function(index) {
       if (this.selectionStart !== index) {
+        this.fire('selection:changed');
         this.canvas && this.canvas.fire('text:selection:changed', { target: this });
       }
       this.selectionStart = index;
@@ -237,6 +240,7 @@
      */
     setSelectionEnd: function(index) {
       if (this.selectionEnd !== index) {
+        this.fire('selection:changed');
         this.canvas && this.canvas.fire('text:selection:changed', { target: this });
       }
       this.selectionEnd = index;
@@ -362,6 +366,8 @@
         textBackgroundColor: style && style.textBackgroundColor || this.textBackgroundColor,
         textDecoration: style && style.textDecoration || this.textDecoration,
         fontFamily: style && style.fontFamily || this.fontFamily,
+        fontWeight: style && style.fontWeight || this.fontWeight,
+        fontStyle: style && style.fontStyle || this.fontStyle,
         stroke: style && style.stroke || this.stroke,
         strokeWidth: style && style.strokeWidth || this.strokeWidth
       };
@@ -635,7 +641,9 @@
      * @private
      * @param {String} method
      * @param {CanvasRenderingContext2D} ctx Context to render on
-     * @param {String} line
+     * @param {String} line Content of the line
+     * @param {Number} left Left coordinate
+     * @param {Number} top Top coordinate
      */
     _renderCharsFast: function(method, ctx, line, left, top) {
       this.skipTextAlign = false;
@@ -650,7 +658,14 @@
 
     /**
      * @private
+     * @param {String} method
      * @param {CanvasRenderingContext2D} ctx Context to render on
+     * @param {Number} lineIndex
+     * @param {Number} i
+     * @param {String} _char
+     * @param {Number} left Left coordinate
+     * @param {Number} top Top coordinate
+     * @param {Number} lineHeight Height of the line
      */
     _renderChar: function(method, ctx, lineIndex, i, _char, left, top, lineHeight) {
       var decl, charWidth, charHeight;
@@ -701,6 +716,8 @@
               prevStyle.textBackgroundColor !== thisStyle.textBackgroundColor ||
               prevStyle.textDecoration !== thisStyle.textDecoration ||
               prevStyle.fontFamily !== thisStyle.fontFamily ||
+              prevStyle.fontWeight !== thisStyle.fontWeight ||
+              prevStyle.fontStyle !== thisStyle.fontStyle ||
               prevStyle.stroke !== thisStyle.stroke ||
               prevStyle.strokeWidth !== thisStyle.strokeWidth
       );
@@ -1099,6 +1116,7 @@
     /**
      * @private
      * @param {CanvasRenderingContext2D} ctx Context to render on
+     * @param {Array} textLines Array of all text lines
      */
     _getTextHeight: function(ctx, textLines) {
       var height = 0;
@@ -1110,7 +1128,6 @@
 
     /**
      * @private
-     * @param {CanvasRenderingContext2D} ctx Context to render on
      */
     _getTopOffset: function() {
       var topOffset = fabric.Text.prototype._getTopOffset.call(this);
@@ -1118,8 +1135,8 @@
     },
 
     /**
-     * @private
      * This method is overwritten to account for different top offset
+     * @private
      */
     _renderTextBoxBackground: function(ctx) {
       if (!this.backgroundColor) return;
@@ -1139,7 +1156,7 @@
 
     /**
      * Returns object representation of an instance
-     * @methd toObject
+     * @method toObject
      * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
      * @return {Object} object representation of an instance
      */

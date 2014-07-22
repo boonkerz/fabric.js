@@ -169,8 +169,9 @@
     var points = fabric.parsePointsAttribute(element.getAttribute('points')),
         parsedAttributes = fabric.parseAttributes(element, fabric.Polyline.ATTRIBUTE_NAMES);
 
-    fabric.util.normalizePoints(points, options);
-
+    if (!('transformMatrix' in parsedAttributes)) {
+      fabric.util.normalizePoints(points, options);
+    }
     return new fabric.Polyline(points, fabric.util.object.extend(parsedAttributes, options), true);
   };
   /* _FROM_SVG_END_ */
@@ -179,7 +180,7 @@
    * Returns fabric.Polyline instance from an object representation
    * @static
    * @memberOf fabric.Polyline
-   * @param object {Object} object Object to create an instance from
+   * @param {Object} object Object to create an instance from
    * @return {fabric.Polyline} Instance of fabric.Polyline
    */
   fabric.Polyline.fromObject = function(object) {

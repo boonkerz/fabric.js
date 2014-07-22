@@ -36,7 +36,7 @@
 
     /**
      * Translates the coordinates from center to origin coordinates (based on the object's dimensions)
-     * @param {fabric.Point} point The point which corresponds to center of the object
+     * @param {fabric.Point} center The point which corresponds to center of the object
      * @param {String} originX Horizontal origin: 'left', 'center' or 'right'
      * @param {String} originY Vertical origin: 'top', 'center' or 'bottom'
      * @return {fabric.Point}
@@ -146,7 +146,7 @@
 
     /**
      * Sets the position of the object taking into consideration the object's origin
-     * @param {fabric.Point} point The new position of the object
+     * @param {fabric.Point} pos The new position of the object
      * @param {String} originX Horizontal origin: 'left', 'center' or 'right'
      * @param {String} originY Vertical origin: 'top', 'center' or 'bottom'
      * @return {void}
@@ -199,8 +199,8 @@
     },
 
     /**
-     * @private
      * Sets the origin/position of the object to it's center point
+     * @private
      * @return {void}
      */
     _setOriginToCenter: function() {
@@ -217,8 +217,8 @@
     },
 
     /**
-     * @private
      * Resets the origin/position of the object to it's original origin
+     * @private
      * @return {void}
      */
     _resetOrigin: function() {

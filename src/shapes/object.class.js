@@ -682,6 +682,7 @@
 
     /**
      * @private
+     * @param {Object} [options] Options object
      */
     _initGradient: function(options) {
       if (options.fill && options.fill.colorStops && !(options.fill instanceof fabric.Gradient)) {
@@ -691,6 +692,7 @@
 
     /**
      * @private
+     * @param {Object} [options] Options object
      */
     _initPattern: function(options) {
       if (options.fill && options.fill.source && !(options.fill instanceof fabric.Pattern)) {
@@ -703,6 +705,7 @@
 
     /**
      * @private
+     * @param {Object} [options] Options object
      */
     _initClipping: function(options) {
       if (!options.clipTo || typeof options.clipTo !== 'string') return;
@@ -732,6 +735,9 @@
      * @param {Boolean} fromLeft When true, context is transformed to object's top/left corner. This is used when rendering text on Node
      */
     transform: function(ctx, fromLeft) {
+      if (this.group) {
+        this.group.transform(ctx, fromLeft);
+      }
       ctx.globalAlpha = this.opacity;
 
       var center = fromLeft ? this._getLeftTopCoords() : this.getCenterPoint();
@@ -749,7 +755,6 @@
      * @return {Object} Object representation of an instance
      */
     toObject: function(propertiesToInclude) {
-
       var NUM_FRACTION_DIGITS = fabric.Object.NUM_FRACTION_DIGITS,
 
           object = {
@@ -921,6 +926,18 @@
     },
 
     /**
+     * Retrieves viewportTransform from Object's canvas if possible
+     * @method getViewportTransform
+     * @memberOf fabric.Object.prototype
+     * @return {Boolean} flipY value // TODO
+     */
+    getViewportTransform: function() {
+      if (this.canvas && this.canvas.viewportTransform)
+        return this.canvas.viewportTransform;
+      return [1, 0, 0, 1, 0, 0];
+    },
+
+    /**
      * Renders an object on a specified context
      * @param {CanvasRenderingContext2D} ctx Context to render on
      * @param {Boolean} [noTransform] When true, context is not transformed
@@ -949,19 +966,14 @@
       this._render(ctx, noTransform);
       this.clipTo && ctx.restore();
       this._removeShadow(ctx);
-
       this._restoreFillRule(ctx);
-
-      if (this.active && !noTransform) {
-        this.drawBorders(ctx);
-        this.drawControls(ctx);
-      }
 
       ctx.restore();
     },
 
     _transform: function(ctx, noTransform) {
       var m = this.transformMatrix;
+
       if (m && !this.group) {
         ctx.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]);
       }
@@ -988,6 +1000,35 @@
           ? this.fill.toLive(ctx)
           : this.fill;
       }
+    },
+
+    /**
+     * Renders controls and borders for the object
+     * @param {CanvasRenderingContext2D} ctx Context to render on
+     * @param {Boolean} [noTransform] When true, context is not transformed
+     */
+    _renderControls: function(ctx, noTransform) {
+      var vpt = this.getViewportTransform();
+
+      ctx.save();
+      if (this.active && !noTransform) {
+        var center;
+        if (this.group) {
+          center = fabric.util.transformPoint(this.group.getCenterPoint(), vpt);
+          ctx.translate(center.x, center.y);
+          ctx.rotate(degreesToRadians(this.group.angle));
+        }
+        center = fabric.util.transformPoint(this.getCenterPoint(), vpt, null != this.group);
+        if (this.group) {
+          center.x *= this.group.scaleX;
+          center.y *= this.group.scaleY;
+        }
+        ctx.translate(center.x, center.y);
+        ctx.rotate(degreesToRadians(this.angle));
+        this.drawBorders(ctx);
+        this.drawControls(ctx);
+      }
+      ctx.restore();
     },
 
     /**
@@ -1046,7 +1087,7 @@
      * @param {CanvasRenderingContext2D} ctx Context to render on
      */
     _renderStroke: function(ctx) {
-      if (!this.stroke) return;
+      if (!this.stroke || this.strokeWidth === 0) return;
 
       ctx.save();
       if (this.strokeDashArray) {
@@ -1086,7 +1127,7 @@
 
     /**
      * Creates an instance of fabric.Image out of an object
-     * @param callback {Function} callback, invoked with an instance as a first argument
+     * @param {Function} callback callback, invoked with an instance as a first argument
      * @return {fabric.Object} thisArg
      */
     cloneAsImage: function(callback) {
@@ -1156,7 +1197,7 @@
 
     /**
      * Returns true if specified type is identical to the type of an instance
-     * @param type {String} type Type to check against
+     * @param {String} type Type to check against
      * @return {Boolean}
      */
     isType: function(type) {
@@ -1304,7 +1345,7 @@
      * canvas.renderAll();
      */
     setShadow: function(options) {
-      return this.set('shadow', new fabric.Shadow(options));
+      return this.set('shadow', options ? new fabric.Shadow(options) : null);
     },
 
     /**

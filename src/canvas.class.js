@@ -250,7 +250,7 @@
      * @return {Boolean} true if point is contained within an area of given object
      */
     containsPoint: function (e, target) {
-      var pointer = this.getPointer(e),
+      var pointer = this.getPointer(e, true),
           xy = this._normalizePointer(target, pointer);
 
       // http://www.geog.ubc.ca/courses/klink/gis.notes/ncgia/u32.html
@@ -268,11 +268,14 @@
           isObjectInGroup = (
             activeGroup &&
             object.type !== 'group' &&
-            activeGroup.contains(object));
+            activeGroup.contains(object)),
+          lt;
 
       if (isObjectInGroup) {
-        x -= activeGroup.left;
-        y -= activeGroup.top;
+        lt = new fabric.Point(activeGroup.left, activeGroup.top);
+        lt = fabric.util.transformPoint(lt, this.viewportTransform, true);
+        x -= lt.x;
+        y -= lt.y;
       }
       return { x: x, y: y };
     },
@@ -403,7 +406,7 @@
       if (!target) return;
 
       var pointer = this.getPointer(e),
-          corner = target._findTargetCorner(pointer),
+          corner = target._findTargetCorner(this.getPointer(e, true)),
           action = this._getActionFromCorner(target, corner),
           origin = this._getOriginFromCorner(target, corner);
 
@@ -441,8 +444,8 @@
     /**
      * Translates object by "setting" its left/top
      * @private
-     * @param x {Number} pointer's x coordinate
-     * @param y {Number} pointer's y coordinate
+     * @param {Number} x pointer's x coordinate
+     * @param {Number} y pointer's y coordinate
      */
     _translateObject: function (x, y) {
       var target = this._currentTransform.target;
@@ -458,9 +461,9 @@
     /**
      * Scales object by invoking its scaleX/scaleY methods
      * @private
-     * @param x {Number} pointer's x coordinate
-     * @param y {Number} pointer's y coordinate
-     * @param by {String} Either 'x' or 'y' - specifies dimension constraint by which to scale an object.
+     * @param {Number} x pointer's x coordinate
+     * @param {Number} y pointer's y coordinate
+     * @param {String} by Either 'x' or 'y' - specifies dimension constraint by which to scale an object.
      *                    When not provided, an object is scaled by both dimensions equally
      */
     _scaleObject: function (x, y, by) {
@@ -613,8 +616,8 @@
     /**
      * Rotates object by invoking its rotate method
      * @private
-     * @param x {Number} pointer's x coordinate
-     * @param y {Number} pointer's y coordinate
+     * @param {Number} x pointer's x coordinate
+     * @param {Number} y pointer's y coordinate
      */
     _rotateObject: function (x, y) {
 
@@ -635,9 +638,11 @@
     },
 
     /**
-     * @private
+     * Set the cursor type of the canvas element
+     * @param {String} value Cursor type of the canvas element.
+     * @see http://www.w3.org/TR/css3-ui/#cursor
      */
-    _setCursor: function (value) {
+    setCursor: function (value) {
       this.upperCanvasEl.style.cursor = value;
     },
 
@@ -708,7 +713,7 @@
         this.lastRenderedObjectWithControlsAboveOverlay &&
         this.lastRenderedObjectWithControlsAboveOverlay.visible &&
         this.containsPoint(e, this.lastRenderedObjectWithControlsAboveOverlay) &&
-        this.lastRenderedObjectWithControlsAboveOverlay._findTargetCorner(this.getPointer(e)));
+        this.lastRenderedObjectWithControlsAboveOverlay._findTargetCorner(this.getPointer(e, true)));
     },
 
     /**
@@ -731,6 +736,7 @@
 
       var target = this._searchPossibleTargets(e);
       this._fireOverOutEvents(target);
+
       return target;
     },
 
@@ -783,9 +789,8 @@
 
       // Cache all targets where their bounding box contains point.
       var target,
-          pointer = this.getPointer(e);
-
-      var i = this._objects.length;
+          pointer = this.getPointer(e, true),
+          i = this._objects.length;
 
       while (i--) {
         if (this._checkTarget(e, this._objects[i], pointer)){
@@ -803,10 +808,22 @@
      * @param {Event} e
      * @return {Object} object with "x" and "y" number values
      */
-    getPointer: function (e) {
-      var pointer = getPointer(e, this.upperCanvasEl),
-          bounds = this.upperCanvasEl.getBoundingClientRect(),
+    getPointer: function (e, ignoreZoom, upperCanvasEl) {
+      if (!upperCanvasEl) {
+        upperCanvasEl = this.upperCanvasEl;
+      }
+      var pointer = getPointer(e, upperCanvasEl),
+          bounds = upperCanvasEl.getBoundingClientRect(),
           cssScale;
+
+      pointer.x = pointer.x - this._offset.left;
+      pointer.y = pointer.y - this._offset.top;
+      if (!ignoreZoom) {
+        pointer = fabric.util.transformPoint(
+          pointer,
+          fabric.util.invertTransform(this.viewportTransform)
+        );
+      }
 
       if (bounds.width === 0 || bounds.height === 0) {
         // If bounds are not available (i.e. not visible), do not apply scale.
@@ -814,19 +831,18 @@
       }
       else {
         cssScale = {
-          width: this.upperCanvasEl.width / bounds.width,
-          height: this.upperCanvasEl.height / bounds.height
+          width: upperCanvasEl.width / bounds.width,
+          height: upperCanvasEl.height / bounds.height
         };
       }
       return {
-        x: (pointer.x - this._offset.left) * cssScale.width,
-        y: (pointer.y - this._offset.top) * cssScale.height
+        x: pointer.x * cssScale.width,
+        y: pointer.y * cssScale.height
       };
     },
 
     /**
      * @private
-     * @param {HTMLElement|String} canvasEl Canvas element
      * @throws {CANVAS_INIT_ERROR} If canvas can not be initialized
      */
     _createUpperCanvas: function () {
@@ -854,8 +870,6 @@
 
     /**
      * @private
-     * @param {Number} width
-     * @param {Number} height
      */
     _initWrapperElement: function () {
       this.wrapperEl = fabric.util.wrapElement(this.lowerCanvasEl, 'div', {
@@ -871,7 +885,7 @@
 
     /**
      * @private
-     * @param {Element} element
+     * @param {HTMLElement} element canvas element to apply styles on
      */
     _applyCanvasStyle: function (element) {
       var width = this.getWidth() || element.width,
@@ -979,7 +993,6 @@
     _setActiveGroup: function(group) {
       this._activeGroup = group;
       if (group) {
-        group.canvas = this;
         group.set('active', true);
       }
     },
@@ -1078,7 +1091,7 @@
      * @private
      */
     _drawGroupControls: function(ctx, activeGroup) {
-      this._drawControls(ctx, activeGroup, 'Group');
+      activeGroup._renderControls(ctx);
     },
 
     /**
@@ -1087,19 +1100,9 @@
     _drawObjectsControls: function(ctx) {
       for (var i = 0, len = this._objects.length; i < len; ++i) {
         if (!this._objects[i] || !this._objects[i].active) continue;
-        this._drawControls(ctx, this._objects[i], 'Object');
+        this._objects[i]._renderControls(ctx);
         this.lastRenderedObjectWithControlsAboveOverlay = this._objects[i];
       }
-    },
-
-    /**
-     * @private
-     */
-    _drawControls: function(ctx, object, klass) {
-      ctx.save();
-      fabric[klass].prototype.transform.call(object, ctx);
-      object.drawBorders(ctx).drawControls(ctx);
-      ctx.restore();
     }
   });
 

@@ -94,8 +94,8 @@
 
     /**
      * Renders this instance on a given context
-     * @param ctx {CanvasRenderingContext2D} context to render on
-     * @param noTransform {Boolean} context is not transformed when set to true
+     * @param {CanvasRenderingContext2D} ctx context to render on
+     * @param {Boolean} [noTransform] When true, context is not transformed
      */
     render: function(ctx, noTransform) {
       // do not use `get` for perf. reasons
@@ -105,17 +105,18 @@
 
     /**
      * @private
-     * @param ctx {CanvasRenderingContext2D} context to render on
+     * @param {CanvasRenderingContext2D} ctx context to render on
+     * @param {Boolean} [noTransform] When true, context is not transformed
      */
     _render: function(ctx, noTransform) {
       ctx.beginPath();
-      ctx.save();
       ctx.globalAlpha = this.group ? (ctx.globalAlpha * this.opacity) : this.opacity;
+      ctx.save();
       ctx.transform(1, 0, 0, this.ry/this.rx, 0, 0);
       ctx.arc(noTransform ? this.left : 0, noTransform ? this.top * this.rx/this.ry : 0, this.rx, 0, piBy2, false);
+      ctx.restore();
       this._renderFill(ctx);
       this._renderStroke(ctx);
-      ctx.restore();
     },
 
     /**
@@ -156,8 +157,8 @@
       parsedAttributes.top = 0;
     }
     if (!('transformMatrix' in parsedAttributes)) {
-      parsedAttributes.left -= (options.width / 2);
-      parsedAttributes.top -= (options.height / 2);
+      parsedAttributes.left -= options.width ? (options.width / 2) : 0;
+      parsedAttributes.top -= options.height ? (options.height / 2) : 0;
     }
     var ellipse = new fabric.Ellipse(extend(parsedAttributes, options));
 

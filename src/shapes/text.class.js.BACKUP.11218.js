@@ -305,6 +305,8 @@
      */
     shadow:               null,
 
+    svgLineTopOffset: 0,
+
     /**
      * Constructor
      * @param {String} text Text string
@@ -1111,10 +1113,13 @@
       options.fontSize = fabric.Text.DEFAULT_SVG_FONT_SIZE;
     }
 
+<<<<<<< HEAD
+=======
     if (!options.originX) {
       options.originX = 'left';
     }
 
+>>>>>>> c0bfbce182c90e30a621422215f926e59d17fa6f
     var text = new fabric.Text(element.textContent, options);
 
     /*

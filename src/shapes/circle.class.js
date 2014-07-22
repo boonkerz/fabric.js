@@ -96,7 +96,8 @@
 
     /**
      * @private
-     * @param ctx {CanvasRenderingContext2D} context to render on
+     * @param {CanvasRenderingContext2D} ctx context to render on
+     * @param {Boolean} [noTransform] When true, context is not transformed
      */
     _render: function(ctx, noTransform) {
       ctx.beginPath();
@@ -161,22 +162,24 @@
    */
   fabric.Circle.fromElement = function(element, options) {
     options || (options = { });
+
     var parsedAttributes = fabric.parseAttributes(element, fabric.Circle.ATTRIBUTE_NAMES);
+
     if (!isValidRadius(parsedAttributes)) {
       throw new Error('value of `r` attribute is required and can not be negative');
     }
-    
-    
+
     if (!('left' in parsedAttributes)) {
-    	parsedAttributes.left = 0;
+      parsedAttributes.left = 0;
     }
     if (!('top' in parsedAttributes)) {
-    	parsedAttributes.top = 0
+      parsedAttributes.top = 0;
     }
     if (!('transformMatrix' in parsedAttributes)) {
-      parsedAttributes.left -= (options.width / 2);
-      parsedAttributes.top -= (options.height / 2);	
-    }    
+      parsedAttributes.left -= options.width ? (options.width / 2) : 0;
+      parsedAttributes.top -= options.height ? (options.height / 2) : 0;
+    }
+
     var obj = new fabric.Circle(extend(parsedAttributes, options));
 
     obj.cx = parseFloat(element.getAttribute('cx')) || 0;

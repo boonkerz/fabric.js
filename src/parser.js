@@ -12,6 +12,7 @@
       capitalize = fabric.util.string.capitalize,
       clone = fabric.util.object.clone,
       toFixed = fabric.util.toFixed,
+      parseUnit = fabric.util.parseUnit,
       multiplyTransformMatrices = fabric.util.multiplyTransformMatrices,
 
       attributesMap = {
@@ -53,7 +54,8 @@
   }
 
   function normalizeValue(attr, value, parentAttributes) {
-    var isArray;
+    var isArray = Object.prototype.toString.call(value) === '[object Array]',
+        parsed;
 
     if ((attr === 'fill' || attr === 'stroke') && value === 'none') {
       value = '';
@@ -62,7 +64,9 @@
       value = (value === 'evenodd') ? 'destination-over' : value;
     }
     else if (attr === 'strokeDashArray') {
-      value = value.replace(/,/g, ' ').split(/\s+/);
+      value = value.replace(/,/g, ' ').split(/\s+/).map(function(n) {
+        return parseInt(n);
+      });
     }
     else if (attr === 'transformMatrix') {
       if (parentAttributes && parentAttributes.transformMatrix) {
@@ -83,11 +87,9 @@
     else if (attr === 'originX' /* text-anchor */) {
       value = value === 'start' ? 'left' : value === 'end' ? 'right' : 'center';
     }
-
-    isArray = Object.prototype.toString.call(value) === '[object Array]';
-
-    // TODO: need to normalize em, %, pt, etc. to px (!)
-    var parsed = isArray ? value.map(parseFloat) : parseFloat(value);
+    else {
+      parsed = isArray ? value.map(parseUnit) : parseUnit(value);
+    }
 
     return (!isArray && isNaN(parsed) ? value : parsed);
   }
@@ -105,8 +107,6 @@
 
       var color = new fabric.Color(attributes[attr]);
       attributes[attr] = color.setAlpha(toFixed(color.getAlpha() * attributes[colorAttributes[attr]], 2)).toRgba();
-
-      delete attributes[colorAttributes[attr]];
     }
     return attributes;
   }
@@ -354,14 +354,64 @@
 
       if (ruleMatchesElement) {
         for (var property in fabric.cssRules[rule]) {
-          var attr = normalizeAttr(property);
-          var value = normalizeValue(attr, fabric.cssRules[rule][property]);
+          var attr = normalizeAttr(property),
+              value = normalizeValue(attr, fabric.cssRules[rule][property]);
           styles[attr] = value;
         }
       }
     }
 
     return styles;
+  }
+
+  /**
+   * @private
+   */
+  function parseUseDirectives(doc) {
+    var nodelist = doc.getElementsByTagName('use');
+    while (nodelist.length) {
+      var el = nodelist[0],
+          xlink = el.getAttribute('xlink:href').substr(1),
+          x = el.getAttribute('x') || 0,
+          y = el.getAttribute('y') || 0,
+          el2 = doc.getElementById(xlink).cloneNode(true),
+          currentTrans = (el.getAttribute('transform') || '') + ' translate(' + x + ', ' + y + ')',
+          parentNode;
+
+      for (var j = 0, attrs = el.attributes, l = attrs.length; j < l; j++) {
+        var attr = attrs.item(j);
+        if (attr.nodeName === 'x' || attr.nodeName === 'y' || attr.nodeName === 'xlink:href') continue;
+
+        if (attr.nodeName === 'transform') {
+          currentTrans = currentTrans + ' ' + attr.nodeValue;
+        }
+        else {
+          el2.setAttribute(attr.nodeName, attr.nodeValue);
+        }
+      }
+
+      el2.setAttribute('transform', currentTrans);
+      el2.removeAttribute('id');
+      parentNode = el.parentNode;
+      parentNode.replaceChild(el2, el);
+    }
+  }
+
+  /**
+   * Add a <g> element that envelop all SCG elements and makes the viewbox transformMatrix descend on all elements
+   */
+  function addSvgTransform(doc, matrix) {
+    matrix[3] = matrix[0] = (matrix[0] > matrix[3] ? matrix[3] : matrix[0]);
+    if (!(matrix[0] !== 1 || matrix[3] !== 1 || matrix[4] !== 0 || matrix[5] !== 0)) return;
+    // default is to preserve aspect ratio
+    // preserveAspectRatio attribute to be implemented
+    var el = document.createElement('g');
+    while (doc.firstChild != null) {
+      var node = doc.firstChild;
+      el.appendChild(node);
+    }
+    el.setAttribute('transform','matrix(' + matrix[0] + ' ' + matrix[1] + ' ' + matrix[2] + ' ' + matrix[3] + ' ' + matrix[4] + ' ' + matrix[5] + ')');
+    doc.appendChild(el);
   }
 
   /**
@@ -403,9 +453,32 @@
 
     return function(doc, callback, reviver) {
       if (!doc) return;
+      var startTime = new Date();
 
-      var startTime = new Date(),
-          descendants = fabric.util.toArray(doc.getElementsByTagName('*'));
+      parseUseDirectives(doc);
+
+      var viewBoxAttr = doc.getAttribute('viewBox'),
+          widthAttr = parseFloat(doc.getAttribute('width')),
+          heightAttr = parseFloat(doc.getAttribute('height')),
+          viewBoxWidth,
+          viewBoxHeight;
+
+      if (viewBoxAttr && (viewBoxAttr = viewBoxAttr.match(reViewBoxAttrValue))) {
+        var minX = parseFloat(viewBoxAttr[1]),
+            minY = parseFloat(viewBoxAttr[2]),
+            scaleX = 1, scaleY = 1;
+        viewBoxWidth = parseFloat(viewBoxAttr[3]);
+        viewBoxHeight = parseFloat(viewBoxAttr[4]);
+        if (widthAttr && widthAttr !== viewBoxWidth ) {
+          scaleX = widthAttr / viewBoxWidth;
+        }
+        if (heightAttr && heightAttr !== viewBoxHeight) {
+          scaleY = heightAttr / viewBoxHeight;
+        }
+        addSvgTransform(doc, [scaleX, 0, 0, scaleY, -minX, -minY]);
+      }
+
+      var descendants = fabric.util.toArray(doc.getElementsByTagName('*'));
 
       if (descendants.length === 0 && fabric.isLikelyNode) {
         // we're likely in node, where "o3-xml" library fails to gEBTN("*")
@@ -428,43 +501,15 @@
         return;
       }
 
-      var viewBoxAttr = doc.getAttribute('viewBox'),
-          widthAttr = parseFloat(doc.getAttribute('width')),
-          heightAttr = parseFloat(doc.getAttribute('height')),
-          width = null,
-          height = null,
-          viewBoxWidth,
-          viewBoxHeight,
-          minX,
-          minY;
-
-      if (viewBoxAttr && (viewBoxAttr = viewBoxAttr.match(reViewBoxAttrValue))) {
-        minX = parseFloat(viewBoxAttr[1]);
-        minY = parseFloat(viewBoxAttr[2]);
-        viewBoxWidth = parseFloat(viewBoxAttr[3]);
-        viewBoxHeight = parseFloat(viewBoxAttr[4]);
-      }
-
-      if (viewBoxWidth && widthAttr && viewBoxWidth !== widthAttr) {
-        width = viewBoxWidth;
-        height = viewBoxHeight;
-      }
-      else {
-        // values of width/height attributes overwrite those extracted from viewbox attribute
-        width = widthAttr ? widthAttr : viewBoxWidth;
-        height = heightAttr ? heightAttr : viewBoxHeight;
-      }
-
       var options = {
-        width: width,
-        height: height,
+        width: widthAttr ? widthAttr : viewBoxWidth,
+        height: heightAttr ? heightAttr : viewBoxHeight,
         widthAttr: widthAttr,
         heightAttr: heightAttr
       };
 
-      fabric.gradientDefs = fabric.getGradientDefs(doc);
-      fabric.cssRules = fabric.getCSSRules(doc);
-
+      fabric.gradientDefs = extend(fabric.getGradientDefs(doc), fabric.gradientDefs);
+      fabric.cssRules = extend(fabric.getCSSRules(doc), fabric.cssRules);
       // Precedence of rules:   style > class > attribute
 
       fabric.parseElements(elements, function(instances) {
@@ -480,46 +525,38 @@
     * Used for caching SVG documents (loaded via `fabric.Canvas#loadSVGFromURL`)
     * @namespace
     */
-   var svgCache = {
+  var svgCache = {
 
-     /**
-      * @param {String} name
-      * @param {Function} callback
-      */
-     has: function (name, callback) {
-       callback(false);
-     },
+    /**
+    * @param {String} name
+    * @param {Function} callback
+    */
+    has: function (name, callback) {
+      callback(false);
+    },
 
-     /**
-      * @param {String} url
-      * @param {Function} callback
-      */
-     get: function () {
-       /* NOOP */
-     },
+    get: function () {
+      /* NOOP */
+    },
 
-     /**
-      * @param {String} url
-      * @param {Object} object
-      */
-     set: function () {
-       /* NOOP */
-     }
-   };
+    set: function () {
+      /* NOOP */
+    }
+  };
 
   /**
    * @private
    */
   function _enlivenCachedObject(cachedObject) {
 
-   var objects = cachedObject.objects,
-       options = cachedObject.options;
+    var objects = cachedObject.objects,
+        options = cachedObject.options;
 
-   objects = objects.map(function (o) {
-     return fabric[capitalize(o.type)].fromObject(o);
-   });
+    objects = objects.map(function (o) {
+      return fabric[capitalize(o.type)].fromObject(o);
+    });
 
-   return ({ objects: objects, options: options });
+    return ({ objects: objects, options: options });
   }
 
   /**
@@ -610,7 +647,7 @@
           parentAttributes = { };
 
       // if there's a parent container (`g` node), parse its attributes recursively upwards
-      if (element.parentNode && /^g$/i.test(element.parentNode.nodeName)) {
+      if (element.parentNode && /^[g|a]$/i.test(element.parentNode.nodeName)) {
         parentAttributes = fabric.parseAttributes(element.parentNode, attributes);
       }
 
@@ -675,7 +712,7 @@
      * Parses "points" attribute, returning an array of values
      * @static
      * @memberOf fabric
-     * @param points {String} points attribute string
+     * @param {String} points points attribute string
      * @return {Array} array of points
      */
     parsePointsAttribute: function(points) {
@@ -683,33 +720,19 @@
       // points attribute is required and must not be empty
       if (!points) return null;
 
-      points = points.trim();
-      var asPairs = points.indexOf(',') > -1;
+      // replace commas with whitespace and remove bookending whitespace
+      points = points.replace(/,/g, ' ').trim();
 
       points = points.split(/\s+/);
       var parsedPoints = [ ], i, len;
 
-      // points could look like "10,20 30,40" or "10 20 30 40"
-      if (asPairs) {
-        i = 0;
-        len = points.length;
-        for (; i < len; i++) {
-          var pair = points[i].split(',');
-          parsedPoints.push({
-            x: parseFloat(pair[0]),
-            y: parseFloat(pair[1])
-          });
-        }
-      }
-      else {
-        i = 0;
-        len = points.length;
-        for (; i < len; i+=2) {
-          parsedPoints.push({
-            x: parseFloat(points[i]),
-            y: parseFloat(points[i + 1])
-          });
-        }
+      i = 0;
+      len = points.length;
+      for (; i < len; i+=2) {
+        parsedPoints.push({
+          x: parseFloat(points[i]),
+          y: parseFloat(points[i + 1])
+        });
       }
 
       // odd number of points is an error
@@ -776,7 +799,6 @@
     loadSVGFromURL: function(url, callback, reviver) {
 
       url = url.replace(/^\n\s*/, '').trim();
-
       svgCache.has(url, function (hasUrl) {
         if (hasUrl) {
           svgCache.get(url, function (value) {

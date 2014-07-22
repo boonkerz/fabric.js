@@ -64,9 +64,9 @@
      * Rotates `point` around `origin` with `radians`
      * @static
      * @memberOf fabric.util
-     * @param {fabric.Point} The point to rotate
-     * @param {fabric.Point} The origin of the rotation
-     * @param {Number} The radians of the angle for the rotation
+     * @param {fabric.Point} point The point to rotate
+     * @param {fabric.Point} origin The origin of the rotation
+     * @param {Number} radians The radians of the angle for the rotation
      * @return {fabric.Point} The new rotated point
      */
     rotatePoint: function(point, origin, radians) {
@@ -82,15 +82,85 @@
     },
 
     /**
+     * Apply transform t to point p
+     * @static
+     * @memberOf fabric.util
+     * @param  {fabric.Point} p The point to transform
+     * @param  {Array} t The transform
+     * @param  {Boolean} [ignoreOffset] Indicates that the offset should not be applied
+     * @return {fabric.Point} The transformed point
+     */
+    transformPoint: function(p, t, ignoreOffset) {
+      if (ignoreOffset) {
+        return new fabric.Point(
+          t[0] * p.x + t[1] * p.y,
+          t[2] * p.x + t[3] * p.y
+        );
+      }
+      return new fabric.Point(
+        t[0] * p.x + t[1] * p.y + t[4],
+        t[2] * p.x + t[3] * p.y + t[5]
+      );
+    },
+
+    /**
+     * Invert transformation t
+     * @static
+     * @memberOf fabric.util
+     * @param {Array} t The transform
+     * @return {Array} The inverted transform
+     */
+    invertTransform: function(t) {
+      var r = t.slice(),
+          a = 1 / (t[0] * t[3] - t[1] * t[2]);
+      r = [a * t[3], -a * t[1], -a * t[2], a * t[0], 0, 0];
+      var o = fabric.util.transformPoint({ x: t[4], y: t[5] }, r);
+      r[4] = -o.x;
+      r[5] = -o.y;
+      return r;
+    },
+
+    /**
      * A wrapper around Number#toFixed, which contrary to native method returns number, not string.
      * @static
      * @memberOf fabric.util
-     * @param {Number | String} number number to operate on
+     * @param {Number|String} number number to operate on
      * @param {Number} fractionDigits number of fraction digits to "leave"
      * @return {Number}
      */
     toFixed: function(number, fractionDigits) {
       return parseFloat(Number(number).toFixed(fractionDigits));
+    },
+
+    /**
+     * Converts from attribute value to pixel value if applicable.
+     * Returns converted pixels or original value not converted.
+     * @param {Number|String} value number to operate on
+     * @return {Number|String}
+     */
+    parseUnit: function(value) {
+      var unit = /\D{0,2}$/.exec(value),
+          number = parseFloat(value);
+
+      switch (unit[0]) {
+        case 'mm':
+          return number * fabric.DPI / 25.4;
+
+        case 'cm':
+          return number * fabric.DPI / 2.54;
+
+        case 'in':
+          return number * fabric.DPI;
+
+        case 'pt':
+          return number * fabric.DPI / 72; // or * 4 / 3
+
+        case 'pc':
+          return number * fabric.DPI / 72 * 12; // or * 16
+
+        default:
+          return number;
+      }
     },
 
     /**
@@ -184,7 +254,8 @@
      * @memberOf fabric.util
      * @param {Array} objects Objects to enliven
      * @param {Function} callback Callback to invoke when all objects are created
-     * @param {Function} [reviver] Method for further parsing of object elements,
+     * @param {String} namespace Namespace to get klass "Class" object from
+     * @param {Function} reviver Method for further parsing of object elements,
      * called after each fabric object created.
      */
     enlivenObjects: function(objects, callback, namespace, reviver) {
@@ -240,12 +311,7 @@
     groupSVGElements: function(elements, options, path) {
       var object;
 
-      if (elements.length > 1) {
-        object = new fabric.PathGroup(elements, options);
-      }
-      else {
-        object = elements[0];
-      }
+      object = new fabric.PathGroup(elements, options);
 
       if (typeof path !== 'undefined') {
         object.setSourcePath(path);

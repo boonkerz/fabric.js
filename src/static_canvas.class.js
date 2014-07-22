@@ -134,8 +134,14 @@
     imageSmoothingEnabled: true,
 
     /**
+     * The transformation (in the format of Canvas transform) which focuses the viewport
+     * @type Array
+     * @default
+     */
+    viewportTransform: [1, 0, 0, 1, 0, 0],
+
+    /**
      * Callback; invoked right before object is about to be scaled/rotated
-     * @param {fabric.Object} target Object that's about to be scaled/rotated
      */
     onBeforeScaleRotate: function () {
       /* NOOP */
@@ -329,7 +335,7 @@
      * @private
      * @param {String} property Property to set ({@link fabric.StaticCanvas#backgroundImage|backgroundImage}
      * or {@link fabric.StaticCanvas#overlayImage|overlayImage})
-     * @param {(fabric.Image|String)} image fabric.Image instance or URL of an image to set background or overlay to
+     * @param {(fabric.Image|String|null)} image fabric.Image instance, URL of an image or null to set background or overlay to
      * @param {Function} callback Callback to invoke when image is loaded and set as background or overlay
      * @param {Object} [options] Optional options to set for the {@link fabric.Image|image}.
      */
@@ -352,11 +358,11 @@
      * @private
      * @param {String} property Property to set ({@link fabric.StaticCanvas#backgroundColor|backgroundColor}
      * or {@link fabric.StaticCanvas#overlayColor|overlayColor})
-     * @param {(Object|String)} color Object with pattern information or color value
+     * @param {(Object|String|null)} color Object with pattern information, color value or null
      * @param {Function} [callback] Callback is invoked when color is set
      */
     __setBgOverlayColor: function(property, color, callback) {
-      if (color.source) {
+      if (color && color.source) {
         var _this = this;
         fabric.util.loadImage(color.source, function(img) {
           _this[property] = new fabric.Pattern({
@@ -422,6 +428,8 @@
 
       this.lowerCanvasEl.style.width = this.width + 'px';
       this.lowerCanvasEl.style.height = this.height + 'px';
+
+      this.viewportTransform = this.viewportTransform.slice();
     },
 
     /**
@@ -464,8 +472,8 @@
      * @return {fabric.Canvas} instance
      * @chainable true
      */
-    setWidth: function (value) {
-      return this._setDimension('width', value);
+    setWidth: function (width) {
+      return this._setDimension('width', width);
     },
 
     /**
@@ -474,8 +482,8 @@
      * @return {fabric.Canvas} instance
      * @chainable true
      */
-    setHeight: function (value) {
-      return this._setDimension('height', value);
+    setHeight: function (height) {
+      return this._setDimension('height', height);
     },
 
     /**
@@ -527,6 +535,92 @@
     },
 
     /**
+     * Returns canvas zoom level
+     * @return {Number}
+     */
+    getZoom: function () {
+      return Math.sqrt(this.viewportTransform[0] * this.viewportTransform[3]);
+    },
+
+    /**
+     * Sets viewport transform of this canvas instance
+     * @param {Array} vpt the transform in the form of context.transform
+     * @return {fabric.Canvas} instance
+     * @chainable true
+     */
+    setViewportTransform: function (vpt) {
+      this.viewportTransform = vpt;
+      this.renderAll();
+      for (var i = 0, len = this._objects.length; i < len; i++) {
+        this._objects[i].setCoords();
+      }
+      return this;
+    },
+
+    /**
+     * Sets zoom level of this canvas instance, zoom centered around point
+     * @param {fabric.Point} point to zoom with respect to
+     * @param {Number} value to set zoom to, less than 1 zooms out
+     * @return {fabric.Canvas} instance
+     * @chainable true
+     */
+    zoomToPoint: function (point, value) {
+      // TODO: just change the scale, preserve other transformations
+      var before = point;
+      point = fabric.util.transformPoint(point, fabric.util.invertTransform(this.viewportTransform));
+      this.viewportTransform[0] = value;
+      this.viewportTransform[3] = value;
+      var after = fabric.util.transformPoint(point, this.viewportTransform);
+      this.viewportTransform[4] += before.x - after.x;
+      this.viewportTransform[5] += before.y - after.y;
+      this.renderAll();
+      for (var i = 0, len = this._objects.length; i < len; i++) {
+        this._objects[i].setCoords();
+      }
+      return this;
+    },
+
+    /**
+     * Sets zoom level of this canvas instance
+     * @param {Number} value to set zoom to, less than 1 zooms out
+     * @return {fabric.Canvas} instance
+     * @chainable true
+     */
+    setZoom: function (value) {
+      this.zoomToPoint(new fabric.Point(0, 0), value);
+      return this;
+    },
+
+    /**
+     * Pan viewport so as to place point at top left corner of canvas
+     * @param {fabric.Point} point to move to
+     * @return {fabric.Canvas} instance
+     * @chainable true
+     */
+    absolutePan: function (point) {
+      this.viewportTransform[4] = -point.x;
+      this.viewportTransform[5] = -point.y;
+      this.renderAll();
+      for (var i = 0, len = this._objects.length; i < len; i++) {
+        this._objects[i].setCoords();
+      }
+      return this;
+    },
+
+    /**
+     * Pans viewpoint relatively
+     * @param {fabric.Point} point (position vector) to move by
+     * @return {fabric.Canvas} instance
+     * @chainable true
+     */
+    relativePan: function (point) {
+      return this.absolutePan(new fabric.Point(
+        -point.x - this.viewportTransform[4],
+        -point.y - this.viewportTransform[5]
+      ));
+    },
+
+    /**
      * Returns &lt;canvas> element corresponding to this instance
      * @return {HTMLCanvasElement}
      */
@@ -559,16 +653,12 @@
     _draw: function (ctx, object) {
       if (!object) return;
 
-      if (this.controlsAboveOverlay) {
-        var hasBorders = object.hasBorders, hasControls = object.hasControls;
-        object.hasBorders = object.hasControls = false;
-        object.render(ctx);
-        object.hasBorders = hasBorders;
-        object.hasControls = hasControls;
-      }
-      else {
-        object.render(ctx);
-      }
+      ctx.save();
+      var v = this.viewportTransform;
+      ctx.transform(v[0], v[1], v[2], v[3], v[4], v[5]);
+      object.render(ctx);
+      ctx.restore();
+      if (!this.controlsAboveOverlay) object._renderControls(ctx);
     },
 
     /**
@@ -577,8 +667,8 @@
      */
     _onObjectAdded: function(obj) {
       this.stateful && obj.setupState();
-      obj.setCoords();
       obj.canvas = this;
+      obj.setCoords();
       this.fire('object:added', { target: obj });
       obj.fire('added');
     },
@@ -647,7 +737,6 @@
      * @chainable
      */
     renderAll: function (allOnTop) {
-
       var canvasToDrawOn = this[(allOnTop === true && this.interactive) ? 'contextTop' : 'contextContainer'],
           activeGroup = this.getActiveGroup();
 
@@ -746,7 +835,7 @@
           this.height);
       }
       if (this.backgroundImage) {
-        this.backgroundImage.render(ctx);
+        this._draw(ctx, this.backgroundImage);
       }
     },
 
@@ -767,7 +856,7 @@
           this.height);
       }
       if (this.overlayImage) {
-        this.overlayImage.render(ctx);
+        this._draw(ctx, this.overlayImage);
       }
     },
 
@@ -922,7 +1011,6 @@
           this._currentTransform.target = this.getActiveGroup();
         }
       }
-
 
       return data;
     },
@@ -1332,7 +1420,7 @@
      * Provides a way to check support of some of the canvas methods
      * (either those of HTMLCanvasElement itself, or rendering context)
      *
-     * @param methodName {String} Method to check support for;
+     * @param {String} methodName Method to check support for;
      *                            Could be one of "getImageData", "toDataURL", "toDataURLWithQuality" or "setLineDash"
      * @return {Boolean | null} `true` if method is supported (or at least exists),
      *                          `null` if canvas element or context can not be initialized
