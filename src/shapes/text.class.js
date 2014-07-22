@@ -379,7 +379,7 @@
       this.width = this._getTextWidth(ctx, textLines);
       this.height = this._getTextHeight(ctx, textLines);
 
-      //this.clipTo && fabric.util.clipContext(this, ctx);
+      this.clipTo && fabric.util.clipContext(this, ctx);
 
       this._renderTextBackground(ctx, textLines);
       this._translateForTextAlign(ctx);
@@ -390,7 +390,7 @@
       }
 
       this._renderTextDecoration(ctx, textLines);
-      //this.clipTo && ctx.restore();
+      this.clipTo && ctx.restore();
 
       this._setBoundaries(ctx, textLines);
       this._totalLineHeight = 0;

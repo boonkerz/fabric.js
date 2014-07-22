@@ -575,13 +575,6 @@
     hasControls:              true,
 
     /**
-    * When set to `false`, object's scale controls are not displayed and can not be used to manipulate object
-    * @type Boolean
-    * @default
-    */
-    hasScaleControls:              true,
-
-    /**
      * When set to `false`, object's controlling borders are not rendered
      * @type Boolean
      * @default

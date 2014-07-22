@@ -14091,13 +14091,6 @@ fabric.util.object.extend(fabric.StaticCanvas.prototype, /** @lends fabric.Stati
     hasControls:              true,
 
     /**
-    * When set to `false`, object's scale controls are not displayed and can not be used to manipulate object
-    * @type Boolean
-    * @default
-    */
-    hasScaleControls:              true,
-
-    /**
      * When set to `false`, object's controlling borders are not rendered
      * @type Boolean
      * @default
@@ -16197,29 +16190,27 @@ fabric.util.object.extend(fabric.Object.prototype, /** @lends fabric.Object.prot
       ctx.globalAlpha = this.isMoving ? this.borderOpacityWhenMoving : 1;
       ctx.strokeStyle = ctx.fillStyle = this.cornerColor;
 
-      if (!this.hasScaleControls)
-          // top-left
-          this._drawControl('tl', ctx, methodName,
-            left - scaleOffsetX - strokeWidth2 - paddingX,
-            top - scaleOffsetY - strokeWidth2 - paddingY);
+      // top-left
+      this._drawControl('tl', ctx, methodName,
+        left - scaleOffsetX - strokeWidth2 - paddingX,
+        top - scaleOffsetY - strokeWidth2 - paddingY);
 
-          // top-right
-          this._drawControl('tr', ctx, methodName,
-            left + width - scaleOffsetX + strokeWidth2 + paddingX,
-            top - scaleOffsetY - strokeWidth2 - paddingY);
+      // top-right
+      this._drawControl('tr', ctx, methodName,
+        left + width - scaleOffsetX + strokeWidth2 + paddingX,
+        top - scaleOffsetY - strokeWidth2 - paddingY);
 
-          // bottom-left
-          this._drawControl('bl', ctx, methodName,
-            left - scaleOffsetX - strokeWidth2 - paddingX,
-            top + height + scaleOffsetSizeY + strokeWidth2 + paddingY);
+      // bottom-left
+      this._drawControl('bl', ctx, methodName,
+        left - scaleOffsetX - strokeWidth2 - paddingX,
+        top + height + scaleOffsetSizeY + strokeWidth2 + paddingY);
 
-          // bottom-right
-          this._drawControl('br', ctx, methodName,
-            left + width + scaleOffsetSizeX + strokeWidth2 + paddingX,
-            top + height + scaleOffsetSizeY + strokeWidth2 + paddingY);
-      }
+      // bottom-right
+      this._drawControl('br', ctx, methodName,
+        left + width + scaleOffsetSizeX + strokeWidth2 + paddingX,
+        top + height + scaleOffsetSizeY + strokeWidth2 + paddingY);
 
-      if (!this.get('lockUniScaling') && this.hasScaleControls) {
+      if (!this.get('lockUniScaling')) {
 
         // middle-top
         this._drawControl('mt', ctx, methodName,
@@ -21872,7 +21863,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
       this.width = this._getTextWidth(ctx, textLines);
       this.height = this._getTextHeight(ctx, textLines);
 
-      //this.clipTo && fabric.util.clipContext(this, ctx);
+      this.clipTo && fabric.util.clipContext(this, ctx);
 
       this._renderTextBackground(ctx, textLines);
       this._translateForTextAlign(ctx);
@@ -21883,7 +21874,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
       }
 
       this._renderTextDecoration(ctx, textLines);
-      //this.clipTo && ctx.restore();
+      this.clipTo && ctx.restore();
 
       this._setBoundaries(ctx, textLines);
       this._totalLineHeight = 0;
@@ -25014,7 +25005,8 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
    * @param {Event} e Event object
    */
   onKeyPress: function(e) {
-    if (!this.isEditing || e.metaKey || e.ctrlKey || e.keyCode === 8 || e.keyCode === 13) {
+    if (!this.isEditing || e.metaKey || e.ctrlKey || e.keyCode === 8 || e.keyCode === 13 || e.keyCode === 37 ||
+        e.keyCode === 38|| e.keyCode === 39 || e.keyCode === 40) {
       return;
     }
 
@@ -25583,7 +25575,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
     for (var j = 0; j <= lineIndex; j++) {
       lineTopOffset += this._getHeightOfLine(this.ctx, j);
     }
-    return lineTopOffset - this.height / 2;
+    return lineTopOffset - this.height / 2 - this._getHeightOfLine(this.ctx, 0);
   },
 
   /**

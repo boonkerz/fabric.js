@@ -72,7 +72,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
     for (var j = 0; j <= lineIndex; j++) {
       lineTopOffset += this._getHeightOfLine(this.ctx, j);
     }
-    return lineTopOffset - this.height / 2;
+    return lineTopOffset - this.height / 2 - this._getHeightOfLine(this.ctx, 0);
   },
 
   /**
