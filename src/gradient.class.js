@@ -105,6 +105,9 @@
       this.coords = coords;
       this.gradientUnits = options.gradientUnits || 'objectBoundingBox';
       this.colorStops = options.colorStops.slice();
+      if (options.gradientTransform) {
+        this.gradientTransform = options.gradientTransform;
+      }
     },
 
     /**
@@ -165,6 +168,7 @@
 
       if (this.type === 'linear') {
         markup = [
+          //jscs:disable validateIndentation
           '<linearGradient ',
             'id="SVGID_', this.id,
             '" gradientUnits="', this.gradientUnits,
@@ -173,10 +177,12 @@
             '" x2="', coords.x2,
             '" y2="', coords.y2,
           '">'
+          //jscs:enable validateIndentation
         ];
       }
       else if (this.type === 'radial') {
         markup = [
+          //jscs:disable validateIndentation
           '<radialGradient ',
             'id="SVGID_', this.id,
             '" gradientUnits="', this.gradientUnits,
@@ -186,16 +192,19 @@
             '" fx="', coords.x1,
             '" fy="', coords.y1,
           '">'
+          //jscs:enable validateIndentation
         ];
       }
 
       for (var i = 0; i < this.colorStops.length; i++) {
         markup.push(
+          //jscs:disable validateIndentation
           '<stop ',
             'offset="', (this.colorStops[i].offset * 100) + '%',
             '" style="stop-color:', this.colorStops[i].color,
             (this.colorStops[i].opacity ? ';stop-opacity: ' + this.colorStops[i].opacity : ';'),
           '"/>'
+          //jscs:enable validateIndentation
         );
       }
 
@@ -213,7 +222,9 @@
     toLive: function(ctx) {
       var gradient;
 
-      if (!this.type) return;
+      if (!this.type) {
+        return;
+      }
 
       if (this.type === 'linear') {
         gradient = ctx.createLinearGradient(
@@ -290,6 +301,7 @@
       var colorStopEls = el.getElementsByTagName('stop'),
           type = (el.nodeName === 'linearGradient' ? 'linear' : 'radial'),
           gradientUnits = el.getAttribute('gradientUnits') || 'objectBoundingBox',
+          gradientTransform = el.getAttribute('gradientTransform'),
           colorStops = [],
           coords = { };
 
@@ -306,12 +318,18 @@
 
       _convertPercentUnitsToValues(instance, coords);
 
-      return new fabric.Gradient({
+      var gradient = new fabric.Gradient({
         type: type,
         coords: coords,
         gradientUnits: gradientUnits,
         colorStops: colorStops
       });
+
+      if (gradientTransform) {
+        gradient.gradientTransform = fabric.parseTransformAttribute(gradientTransform);
+      }
+
+      return gradient;
     },
     /* _FROM_SVG_END_ */
 

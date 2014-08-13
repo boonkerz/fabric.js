@@ -80,6 +80,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
    */
   _createTextCharBg: function(styleDecl, lineLeftOffset, lineTopOffset, heightOfLine, charWidth, charOffset) {
     return [
+      //jscs:disable validateIndentation
       '<rect fill="', styleDecl.textBackgroundColor,
       '" transform="translate(',
         -this.width / 2, ' ',
@@ -89,6 +90,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
       '" width="', charWidth,
       '" height="', heightOfLine,
       '"></rect>'
+      //jscs:enable validateIndentation
     ].join('');
   },
 
@@ -105,6 +107,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
     }, styleDecl));
 
     return [
+      //jscs:disable validateIndentation
       '<tspan x="', lineLeftOffset + charOffset, '" ',
         yProp, '="', lineTopOffset, '" ',
 
@@ -117,6 +120,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
 
         fabric.util.string.escapeXml(_char),
       '</tspan>'
+      //jscs:enable validateIndentation
     ].join('');
   }
 });

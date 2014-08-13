@@ -207,7 +207,9 @@
      * Returns true if object has no styling
      */
     isEmptyStyles: function() {
-      if (!this.styles) return true;
+      if (!this.styles) {
+        return true;
+      }
       var obj = this.styles;
 
       for (var p1 in obj) {
@@ -319,7 +321,9 @@
      * Renders cursor or selection (depending on what exists)
      */
     renderCursorOrSelection: function() {
-      if (!this.active) return;
+      if (!this.active) {
+        return;
+      }
 
       var chars = this.text.split(''),
           boundaries;
@@ -735,7 +739,9 @@
 
           fontSize = (styleDeclaration ? styleDeclaration.fontSize : null) || this.fontSize;
 
-      if (!textDecoration) return;
+      if (!textDecoration) {
+        return;
+      }
 
       if (textDecoration.indexOf('underline') > -1) {
         this._renderCharDecorationAtOffset(
@@ -806,7 +812,9 @@
      * @param {Array} textLines Array of all text lines
      */
     _renderTextLinesBackground: function(ctx, textLines) {
-      if (!this.textBackgroundColor && !this.styles) return;
+      if (!this.textBackgroundColor && !this.styles) {
+        return;
+      }
 
       ctx.save();
 
@@ -1139,7 +1147,9 @@
      * @private
      */
     _renderTextBoxBackground: function(ctx) {
-      if (!this.backgroundColor) return;
+      if (!this.backgroundColor) {
+        return;
+      }
 
       ctx.save();
       ctx.fillStyle = this.backgroundColor;
