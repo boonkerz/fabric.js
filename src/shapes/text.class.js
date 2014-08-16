@@ -985,7 +985,7 @@
         textBgRects: textBgRects
       };
     },
-
+/*
     _setSVGTextLineText: function(textLine, i, textSpans, lineHeight, lineTopOffsetMultiplier, textBgRects) {
       var lineLeftOffset = (this._boundaries && this._boundaries[i])
         ? toFixed(this._boundaries[i].left, 2)
@@ -1007,7 +1007,27 @@
       );
 
       this.svgLineTopOffset += lineHeight;
-    },
+    },*/
+
+      _setSVGTextLineText: function(textLine, i, textSpans, lineHeight, lineTopOffsetMultiplier) {
+          var lineLeftOffset = (this._boundaries && this._boundaries[i])
+              ? toFixed(this._boundaries[i].left, 2)
+              : 0;
+
+          textSpans.push(
+              '<tspan x="',
+              lineLeftOffset, '" ',
+              (i === 0 || this.useNative ? 'y' : 'dy'), '="',
+              toFixed(this.useNative
+                  ? ((lineHeight * i) - this.height / 2)
+                  : (lineHeight * lineTopOffsetMultiplier), 2), '" ',
+              // doing this on <tspan> elements since setting opacity
+              // on containing <text> one doesn't work in Illustrator
+              this._getFillAttributes(this.fill), '>',
+              fabric.util.string.escapeXml(textLine),
+              '</tspan>'
+          );
+      },
 
     _setSVGTextLineBg: function(textBgRects, i, textLeftOffset, lineHeight) {
       textBgRects.push(

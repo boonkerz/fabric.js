@@ -803,7 +803,7 @@
           i = this._objects.length;
 
       while (i--) {
-        if (this._checkTarget(e, this._objects[i], pointer)){
+        if (this._checkTarget(e, this._objects[i], pointer) && this._objects[i].selectable){
           this.relatedTarget = this._objects[i];
           target = this._objects[i];
           break;
