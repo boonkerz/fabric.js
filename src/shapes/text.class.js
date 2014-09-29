@@ -886,8 +886,22 @@
      * @private
      */
     _wrapSVGTextAndBg: function(markup, textAndBg, shadowSpans, offsets) {
-      markup.push(
-        '<g transform="', this.getSvgTransform(), this.getSvgTransformMatrix(), '">\n',
+
+        var uuid = fabric.util.generateUUID();
+
+        if (this.clipTo && this.clipTo.type) {
+            markup.push('<clipPath ',
+                'id="canvas-' + uuid + '">');
+            markup.push(this.clipTo.toSVG());
+            markup.push('</clipPath> ');
+        }
+
+        markup.push('<g ');
+        if (this.clipTo && this.clipTo.type) {
+            markup.push('clip-path="url(#canvas-' + uuid + ')" ');
+        }
+
+        markup.push('transform="', this.getSvgTransform(), this.getSvgTransformMatrix(), '">\n',
           textAndBg.textBgRects.join(''),
           '<text ',
             (this.fontFamily ? 'font-family="' + this.fontFamily.replace(/"/g,'\'') + '" ': ''),

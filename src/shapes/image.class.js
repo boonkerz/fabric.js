@@ -174,8 +174,22 @@
         x = this.left;
         y = this.top;
       }
-      markup.push(
-        '<g transform="', this.getSvgTransform(), this.getSvgTransformMatrix(), '">\n',
+
+        var uuid = fabric.util.generateUUID();
+
+        if (this.clipTo && this.clipTo.type) {
+            markup.push('<clipPath ',
+                'id="canvas-' + uuid + '">');
+            markup.push(this.clipTo.toSVG(reviver));
+            markup.push('</clipPath> ');
+        }
+
+      markup.push('<g ');
+        if (this.clipTo && this.clipTo.type) {
+            markup.push('clip-path="url(#canvas-' + uuid + ')" ');
+        }
+
+        markup.push('transform="', this.getSvgTransform(), this.getSvgTransformMatrix(), '">\n',
           '<image xlink:href="', this.getSvgSrc(),
             '" x="', x, '" y="', y,
             '" style="', this.getSvgStyles(),

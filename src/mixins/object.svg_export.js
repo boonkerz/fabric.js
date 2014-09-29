@@ -25,6 +25,10 @@ fabric.util.object.extend(fabric.Object.prototype, /** @lends fabric.Object.prot
         visibility = this.visible ? '' : ' visibility: hidden;',
         filter = this.shadow && this.type !== 'text' ? 'filter: url(#SVGID_' + this.shadow.id + ');' : '';
 
+      if(fill == 'transparent') {
+          fill = 'none';
+      }
+
     return [
       'stroke: ', stroke, '; ',
       'stroke-width: ', strokeWidth, '; ',
@@ -58,7 +62,8 @@ fabric.util.object.extend(fabric.Object.prototype, /** @lends fabric.Object.prot
                           ' ' +
                           toFixed(center.y, NUM_FRACTION_DIGITS) +
                         ')',
-
+        translatePart = translatePart.trim();
+      
         anglePart = angle !== 0
           ? (' rotate(' + toFixed(angle, NUM_FRACTION_DIGITS) + ')')
           : '',
