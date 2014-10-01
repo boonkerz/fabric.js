@@ -16202,7 +16202,7 @@ fabric.util.object.extend(fabric.Object.prototype, /** @lends fabric.Object.prot
                           toFixed(center.y, NUM_FRACTION_DIGITS) +
                         ')',
         translatePart = translatePart.trim();
-      
+
         anglePart = angle !== 0
           ? (' rotate(' + toFixed(angle, NUM_FRACTION_DIGITS) + ')')
           : '',
@@ -18439,12 +18439,19 @@ fabric.util.object.extend(fabric.Object.prototype, /** @lends fabric.Object.prot
         points.push(toFixed(this.points[i].x, 2), ',', toFixed(this.points[i].y, 2), ' ');
       }
 
+        var transform = this.getSvgTransform();
+
+        if(transform != '') {
+            transform += ' ';
+        }
+
+        transform += this.getSvgTransformMatrix();
+
       markup.push(
         '<polygon ',
           'points="', points.join(''),
           '" style="', this.getSvgStyles(),
-          '" transform="', this.getSvgTransform(),
-          ' ', this.getSvgTransformMatrix(),
+          '" transform="', transform,
         '"/>\n'
       );
 
@@ -22950,7 +22957,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
             (this.textDecoration ? 'text-decoration="' + this.textDecoration + '" ': ''),
             'style="', this.getSvgStyles(), '" ',
             /* svg starts from left/bottom corner so we normalize height */
-            'transform="translate(', toFixed(offsets.textLeft, 2), ' ', toFixed(offsets.textTop, 2), ')">',
+            'transform="translate(', toFixed(offsets.textLeft, 2), ' ', toFixed(offsets.textTop/2, 2), ')">',
             shadowSpans.join(''),
             textAndBg.textSpans.join(''),
           '</text>\n',

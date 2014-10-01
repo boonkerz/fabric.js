@@ -63,7 +63,7 @@ fabric.util.object.extend(fabric.Object.prototype, /** @lends fabric.Object.prot
                           toFixed(center.y, NUM_FRACTION_DIGITS) +
                         ')',
         translatePart = translatePart.trim();
-      
+
         anglePart = angle !== 0
           ? (' rotate(' + toFixed(angle, NUM_FRACTION_DIGITS) + ')')
           : '',

@@ -9551,7 +9551,12 @@ fabric.util.object.extend(fabric.Object.prototype, {
             for (var i = 0, len = this.points.length; i < len; i++) {
                 points.push(toFixed(this.points[i].x, 2), ",", toFixed(this.points[i].y, 2), " ");
             }
-            markup.push("<polygon ", 'points="', points.join(""), '" style="', this.getSvgStyles(), '" transform="', this.getSvgTransform(), " ", this.getSvgTransformMatrix(), '"/>\n');
+            var transform = this.getSvgTransform();
+            if (transform != "") {
+                transform += " ";
+            }
+            transform += this.getSvgTransformMatrix();
+            markup.push("<polygon ", 'points="', points.join(""), '" style="', this.getSvgStyles(), '" transform="', transform, '"/>\n');
             return reviver ? reviver(markup.join("")) : markup.join("");
         },
         _render: function(ctx) {
@@ -11502,7 +11507,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass({
             if (this.clipTo && this.clipTo.type) {
                 markup.push('clip-path="url(#canvas-' + uuid + ')" ');
             }
-            markup.push('transform="', this.getSvgTransform(), this.getSvgTransformMatrix(), '">\n', textAndBg.textBgRects.join(""), "<text ", this.fontFamily ? 'font-family="' + this.fontFamily.replace(/"/g, "'") + '" ' : "", this.fontSize ? 'font-size="' + this.fontSize + '" ' : "", this.fontStyle ? 'font-style="' + this.fontStyle + '" ' : "", this.fontWeight ? 'font-weight="' + this.fontWeight + '" ' : "", this.textDecoration ? 'text-decoration="' + this.textDecoration + '" ' : "", 'style="', this.getSvgStyles(), '" ', 'transform="translate(', toFixed(offsets.textLeft, 2), " ", toFixed(offsets.textTop, 2), ')">', shadowSpans.join(""), textAndBg.textSpans.join(""), "</text>\n", "</g>\n");
+            markup.push('transform="', this.getSvgTransform(), this.getSvgTransformMatrix(), '">\n', textAndBg.textBgRects.join(""), "<text ", this.fontFamily ? 'font-family="' + this.fontFamily.replace(/"/g, "'") + '" ' : "", this.fontSize ? 'font-size="' + this.fontSize + '" ' : "", this.fontStyle ? 'font-style="' + this.fontStyle + '" ' : "", this.fontWeight ? 'font-weight="' + this.fontWeight + '" ' : "", this.textDecoration ? 'text-decoration="' + this.textDecoration + '" ' : "", 'style="', this.getSvgStyles(), '" ', 'transform="translate(', toFixed(offsets.textLeft, 2), " ", toFixed(offsets.textTop / 2, 2), ')">', shadowSpans.join(""), textAndBg.textSpans.join(""), "</text>\n", "</g>\n");
         },
         _getSVGShadows: function(lineHeight, textLines) {
             var shadowSpans = [], i, len, lineTopOffsetMultiplier = 1;
