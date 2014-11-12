@@ -9186,7 +9186,7 @@ fabric.util.object.extend(fabric.Object.prototype, {
                 x = this.left + this.radius;
                 y = this.top + this.radius;
             }
-            markup.push("<circle ", 'cx="' + x + '" cy="' + y + '" ', 'r="', this.radius, '" style="', this.getSvgStyles(), '" transform="', this.getSvgTransform(), " ", this.getSvgTransformMatrix(), '"/>\n');
+            markup.push("<circle ", 'cx="' + x + '" cy="' + y + '" ', 'r="', this.radius, '" style="', this.getSvgStyles(), '" transform="', this.getSvgTransform(), this.getSvgTransformMatrix(), '"/>\n');
             return reviver ? reviver(markup.join("")) : markup.join("");
         },
         _render: function(ctx, noTransform) {
@@ -9415,7 +9415,17 @@ fabric.util.object.extend(fabric.Object.prototype, {
                 x = -this.width / 2;
                 y = -this.height / 2;
             }
-            markup.push("<rect ", 'x="', x, '" y="', y, '" rx="', this.get("rx"), '" ry="', this.get("ry"), '" width="', this.width, '" height="', this.height, '" style="', this.getSvgStyles(), '" transform="', this.getSvgTransform(), this.getSvgTransformMatrix(), '"/>\n');
+            var uuid = fabric.util.generateUUID();
+            if (this.clipTo && this.clipTo.type) {
+                markup.push("<clipPath ", 'id="canvas-' + uuid + '">');
+                markup.push(this.clipTo.toSVG(reviver));
+                markup.push("</clipPath>");
+            }
+            markup.push("<rect ");
+            if (this.clipTo && this.clipTo.type) {
+                markup.push('clip-path="url(#canvas-' + uuid + ')" ');
+            }
+            markup.push('x="', x, '" y="', y, '" rx="', this.get("rx"), '" ry="', this.get("ry"), '" width="', this.width, '" height="', this.height, '" style="', this.getSvgStyles(), '" transform="', this.getSvgTransform(), this.getSvgTransformMatrix(), '"/>\n');
             return reviver ? reviver(markup.join("")) : markup.join("");
         },
         complexity: function() {
