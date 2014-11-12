@@ -89,8 +89,8 @@
           'cx="' + x + '" cy="' + y + '" ',
           'r="', this.radius,
           '" style="', this.getSvgStyles(),
-          '" transform="', this.getSvgTransform(),
-          ' ', this.getSvgTransformMatrix(),
+          '" transform="', this.getSvgTransform()
+          , this.getSvgTransformMatrix(),
         '"/>\n'
       );
 

@@ -176,8 +176,21 @@
         x = -this.width / 2;
         y = -this.height / 2;
 	    }
+
+        var uuid = fabric.util.generateUUID();
+
+        if (this.clipTo && this.clipTo.type) {
+            markup.push('<clipPath ',
+                'id="canvas-' + uuid + '">');
+            markup.push(this.clipTo.toSVG(reviver));
+            markup.push('</clipPath>');
+        }
+
+        markup.push('<rect ');
+        if (this.clipTo && this.clipTo.type) {
+            markup.push('clip-path="url(#canvas-' + uuid + ')" ');
+        }
       markup.push(
-        '<rect ',
           'x="', x, '" y="', y,
           '" rx="', this.get('rx'), '" ry="', this.get('ry'),
           '" width="', this.width, '" height="', this.height,
