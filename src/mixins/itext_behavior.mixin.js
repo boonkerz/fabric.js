@@ -580,6 +580,9 @@
      */
     insertStyleObjects: function(_chars, isEndOfLine, useCopiedStyle) {
       // removed shortcircuit over isEmptyStyles
+      if (this.isEmptyStyles()) {
+        return;
+      }
 
       var cursorLocation = this.get2DCursorLocation(),
           lineIndex = cursorLocation.lineIndex,

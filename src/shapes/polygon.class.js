@@ -123,12 +123,19 @@
         points.push(toFixed(this.points[i].x, 2), ',', toFixed(this.points[i].y, 2), ' ');
       }
 
+        var transform = this.getSvgTransform();
+
+        if(transform != '') {
+            transform += ' ';
+        }
+
+        transform += this.getSvgTransformMatrix();
+
       markup.push(
         '<', this.type, ' ',
           'points="', points.join(''),
           '" style="', this.getSvgStyles(),
-          '" transform="', this.getSvgTransform(),
-          ' ', this.getSvgTransformMatrix(),
+          '" transform="', transform,
         '"/>\n'
       );
 

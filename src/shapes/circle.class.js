@@ -128,7 +128,7 @@
           ' 0 ', + largeFlag + ' 1', ' ' + endX + ' ' + endY,
           '" style="', this.getSvgStyles(),
           '" transform="', this.getSvgTransform(),
-          ' ', this.getSvgTransformMatrix(),
+          this.getSvgTransformMatrix(),
           '"/>\n'
         );
       }
