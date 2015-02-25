@@ -2,7 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2ab72ddd-b969-443a-b27f-a3706f6f6df8" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/shapes/itext.class.js" afterPath="$PROJECT_DIR$/src/shapes/itext.class.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dist/fabric.min.js.gz" afterPath="$PROJECT_DIR$/dist/fabric.min.js.gz" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/shapes/circle.class.js" afterPath="$PROJECT_DIR$/src/shapes/circle.class.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dist/fabric.js" afterPath="$PROJECT_DIR$/dist/fabric.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dist/fabric.min.js" afterPath="$PROJECT_DIR$/dist/fabric.min.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dist/fabric.require.js" afterPath="$PROJECT_DIR$/dist/fabric.require.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="fabricjs.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -37,11 +42,51 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="itext.class.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="itext.class.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/shapes/itext.class.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.43219405" vertical-offset="10693" max-vertical-offset="16905">
+            <state vertical-scroll-proportion="-14.0" vertical-offset="10693" max-vertical-offset="16905">
               <caret line="739" column="19" selection-start-line="739" selection-start-column="19" selection-end-line="739" selection-end-column="19" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="object.svg_export.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/mixins/object.svg_export.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1890">
+              <caret line="34" column="50" selection-start-line="34" selection-start-column="6" selection-end-line="34" selection-end-column="50" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="circle.class.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/shapes/circle.class.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.5508021" vertical-offset="1180" max-vertical-offset="3780">
+              <caret line="113" column="12" selection-start-line="113" selection-start-column="12" selection-end-line="113" selection-end-column="12" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="path.class.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/shapes/path.class.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-19.357143" vertical-offset="7708" max-vertical-offset="15105">
+              <caret line="550" column="12" selection-start-line="549" selection-start-column="13" selection-end-line="550" selection-end-column="12" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="path_group.class.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/shapes/path_group.class.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="1845" max-vertical-offset="3780">
+              <caret line="155" column="51" selection-start-line="155" selection-start-column="14" selection-end-line="155" selection-end-column="51" />
               <folding />
             </state>
           </provider>
@@ -71,8 +116,11 @@
         <option value="$PROJECT_DIR$/src/mixins/object_interactivity.mixin.js" />
         <option value="$PROJECT_DIR$/src/shapes/text.class.js" />
         <option value="$PROJECT_DIR$/src/mixins/itext_behavior.mixin.js" />
-        <option value="$PROJECT_DIR$/src/mixins/object.svg_export.js" />
         <option value="$PROJECT_DIR$/src/shapes/itext.class.js" />
+        <option value="$PROJECT_DIR$/src/shapes/path.class.js" />
+        <option value="$PROJECT_DIR$/src/shapes/path_group.class.js" />
+        <option value="$PROJECT_DIR$/src/mixins/object.svg_export.js" />
+        <option value="$PROJECT_DIR$/src/shapes/circle.class.js" />
       </list>
     </option>
   </component>
@@ -434,14 +482,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/mixins/object.svg_export.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="255" max-vertical-offset="1890">
-          <caret line="17" column="56" selection-start-line="17" selection-start-column="56" selection-end-line="17" selection-end-column="56" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/shapes/rect.class.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="2115" max-vertical-offset="3900">
@@ -452,8 +492,40 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/shapes/itext.class.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.43219405" vertical-offset="10693" max-vertical-offset="16905">
+        <state vertical-scroll-proportion="-14.0" vertical-offset="10693" max-vertical-offset="16905">
           <caret line="739" column="19" selection-start-line="739" selection-start-column="19" selection-end-line="739" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/shapes/path.class.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-19.357143" vertical-offset="7708" max-vertical-offset="15105">
+          <caret line="550" column="12" selection-start-line="549" selection-start-column="13" selection-end-line="550" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/shapes/path_group.class.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1845" max-vertical-offset="3780">
+          <caret line="155" column="51" selection-start-line="155" selection-start-column="14" selection-end-line="155" selection-end-column="51" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/mixins/object.svg_export.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1890">
+          <caret line="34" column="50" selection-start-line="34" selection-start-column="6" selection-end-line="34" selection-end-column="50" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/shapes/circle.class.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5508021" vertical-offset="1180" max-vertical-offset="3780">
+          <caret line="113" column="12" selection-start-line="113" selection-start-column="12" selection-end-line="113" selection-end-column="12" />
           <folding />
         </state>
       </provider>

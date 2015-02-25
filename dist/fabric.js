@@ -17800,7 +17800,7 @@ fabric.util.object.extend(fabric.Object.prototype, /** @lends fabric.Object.prot
             'r="', this.radius,
             '" style="', this.getSvgStyles(),
             '" transform="', this.getSvgTransform(),
-            ' ', this.getSvgTransformMatrix(),
+            this.getSvgTransformMatrix(),
           '"/>\n'
         );
       }
