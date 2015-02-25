@@ -15,6 +15,8 @@ fabric.util.object.extend(fabric.Object.prototype, /** @lends fabric.Object.prot
           ? (this.stroke.toLive ? 'url(#SVGID_' + this.stroke.id + ')' : this.stroke)
           : 'none',
 
+        fillOpacity = this.fill == 'transparent' ? 0 : 1,
+
         strokeWidth = this.strokeWidth ? this.strokeWidth : '0',
         strokeDashArray = this.strokeDashArray ? this.strokeDashArray.join(' ') : '',
         strokeLineCap = this.strokeLineCap ? this.strokeLineCap : 'butt',
@@ -24,6 +26,8 @@ fabric.util.object.extend(fabric.Object.prototype, /** @lends fabric.Object.prot
 
         visibility = this.visible ? '' : ' visibility: hidden;',
         filter = this.shadow ? 'filter: url(#SVGID_' + this.shadow.id + ');' : '';
+
+
 
     return [
       'stroke: ', stroke, '; ',
@@ -35,6 +39,7 @@ fabric.util.object.extend(fabric.Object.prototype, /** @lends fabric.Object.prot
       'fill: ', fill, '; ',
       'fill-rule: ', fillRule, '; ',
       'opacity: ', opacity, ';',
+      'fill-opacity: ', fillOpacity, ';',
       filter,
       visibility
     ].join('');

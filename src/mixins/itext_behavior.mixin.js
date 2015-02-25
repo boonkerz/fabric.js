@@ -581,7 +581,7 @@
     insertStyleObjects: function(_chars, isEndOfLine, useCopiedStyle) {
       // removed shortcircuit over isEmptyStyles
       if (this.isEmptyStyles()) {
-        return;
+        //return;
       }
 
       var cursorLocation = this.get2DCursorLocation(),
