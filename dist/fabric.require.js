@@ -12554,7 +12554,9 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass({
             }
         },
         _renderTextLine: function(method, ctx, line, left, top, lineIndex) {
-            top += this.fontSize * (this._fontSizeFraction + .03);
+            if (!this.isEmptyStyles()) {
+                top += this.fontSize * (this._fontSizeFraction + .03);
+            }
             this.callSuper("_renderTextLine", method, ctx, line, left, top, lineIndex);
         },
         _renderTextDecoration: function(ctx) {

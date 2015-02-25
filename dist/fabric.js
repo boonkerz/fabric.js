@@ -25036,7 +25036,9 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
     _renderTextLine: function(method, ctx, line, left, top, lineIndex) {
       // to "cancel" this.fontSize subtraction in fabric.Text#_renderTextLine
       // the adding 0.03 is just to align text with itext by overlap test
-      top += this.fontSize * (this._fontSizeFraction + 0.03);
+      if (!this.isEmptyStyles()) {
+        top += this.fontSize * (this._fontSizeFraction + 0.03);
+      }
       this.callSuper('_renderTextLine', method, ctx, line, left, top, lineIndex);
     },
 
