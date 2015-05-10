@@ -26,7 +26,7 @@ fabric.BaseBrush = fabric.util.createClass(/** @lends fabric.BaseBrush.prototype
    * @type fabric.Shadow
    * @default
    */
-  shadow:          null,
+  shadow:           null,
 
   /**
    * Line endings style of a brush (one of "butt", "round", "square")
@@ -47,7 +47,7 @@ fabric.BaseBrush = fabric.util.createClass(/** @lends fabric.BaseBrush.prototype
    * @type Array
    * @default
    */
-  strokeDashArray:   null,
+  strokeDashArray:  null,
 
   /**
    * Sets shadow of an object
@@ -71,7 +71,9 @@ fabric.BaseBrush = fabric.util.createClass(/** @lends fabric.BaseBrush.prototype
     ctx.lineWidth = this.width;
     ctx.lineCap = this.strokeLineCap;
     ctx.lineJoin = this.strokeLineJoin;
-    ctx.setLineDash(this.strokeDashArray);
+    if (this.strokeDashArray && fabric.StaticCanvas.supports('setLineDash')) {
+      ctx.setLineDash(this.strokeDashArray);
+    }
   },
 
   /**

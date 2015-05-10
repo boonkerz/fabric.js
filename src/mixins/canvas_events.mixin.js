@@ -140,6 +140,7 @@
     _onShake: function(e, self) {
       this.__onShake && this.__onShake(e, self);
     },
+
     /**
      * @private
      * @param {Event} [e] Event object fired on Event.js shake
@@ -451,12 +452,10 @@
      * @private
      */
     _beforeTransform: function(e, target) {
-      var corner;
-
       this.stateful && target.saveState();
 
       // determine if it's a drag or rotate case
-      if ((corner = target._findTargetCorner(this.getPointer(e)))) {
+      if (target._findTargetCorner(this.getPointer(e))) {
         this.onBeforeScaleRotate(target);
       }
 
@@ -526,14 +525,14 @@
     },
 
     /**
-      * Method that defines the actions when mouse is hovering the canvas.
-      * The currentTransform parameter will definde whether the user is rotating/scaling/translating
-      * an image or neither of them (only hovering). A group selection is also possible and would cancel
-      * all any other type of action.
-      * In case of an image transformation only the top canvas will be rendered.
-      * @private
-      * @param {Event} e Event object fired on mousemove
-      */
+     * Method that defines the actions when mouse is hovering the canvas.
+     * The currentTransform parameter will definde whether the user is rotating/scaling/translating
+     * an image or neither of them (only hovering). A group selection is also possible and would cancel
+     * all any other type of action.
+     * In case of an image transformation only the top canvas will be rendered.
+     * @private
+     * @param {Event} e Event object fired on mousemove
+     */
     __onMouseMove: function (e) {
 
       var target, pointer;
@@ -640,7 +639,7 @@
       if (transform.action === 'scale' || transform.action === 'scaleX' || transform.action === 'scaleY') {
         var centerTransform = this._shouldCenterTransform(e, transform.target);
 
-           // Switch from a normal resize to center-based
+        // Switch from a normal resize to center-based
         if ((centerTransform && (transform.originX !== 'center' || transform.originY !== 'center')) ||
            // Switch from center-based resize to normal one
            (!centerTransform && transform.originX === 'center' && transform.originY === 'center')

@@ -42,6 +42,13 @@
     type: 'group',
 
     /**
+     * Width of stroke
+     * @type Number
+     * @default
+     */
+    strokeWidth: 0,
+
+    /**
      * Constructor
      * @param {Object} objects Group objects
      * @param {Object} [options] Options object
@@ -56,7 +63,6 @@
       }
 
       this.originalState = { };
-      this.callSuper('initialize');
 
       if (options.originX) {
         this.originX = options.originX;
@@ -123,6 +129,7 @@
       if (object) {
         this._objects.push(object);
         object.group = this;
+        object._set('canvas', this.canvas);
       }
       // since _restoreObjectsState set objects inactive
       this.forEachObject(this._setObjectActive, this);
@@ -164,6 +171,7 @@
      */
     _onObjectAdded: function(object) {
       object.group = this;
+      object._set('canvas', this.canvas);
     },
 
     /**
@@ -195,7 +203,7 @@
      * @private
      */
     _set: function(key, value) {
-      if (key in this.delegatedProperties) {
+      if (key in this.delegatedProperties || key === 'canvas') {
         var i = this._objects.length;
         while (i--) {
           this._objects[i].set(key, value);
@@ -226,8 +234,11 @@
       }
 
       ctx.save();
+      if (this.transformMatrix) {
+        ctx.transform.apply(ctx, this.transformMatrix);
+      }
+      this.transform(ctx);
       this.clipTo && fabric.util.clipContext(this, ctx);
-
       // the array is now sorted in order of highest first, so start from end
       for (var i = 0, len = this._objects.length; i < len; i++) {
         this._renderObject(this._objects[i], ctx);
@@ -254,17 +265,14 @@
      * @private
      */
     _renderObject: function(object, ctx) {
-      var originalHasRotatingPoint = object.hasRotatingPoint;
-
       // do not render if object is not visible
       if (!object.visible) {
         return;
       }
 
+      var originalHasRotatingPoint = object.hasRotatingPoint;
       object.hasRotatingPoint = false;
-
       object.render(ctx);
-
       object.hasRotatingPoint = originalHasRotatingPoint;
     },
 
@@ -277,6 +285,20 @@
     _restoreObjectsState: function() {
       this._objects.forEach(this._restoreObjectState, this);
       return this;
+    },
+
+    /**
+     * Realises the transform from this group onto the supplied object
+     * i.e. it tells you what would happen if the supplied object was in
+     * the group, and then the group was destroyed. It mutates the supplied
+     * object.
+     * @param {fabric.Object} object
+     * @return {fabric.Object} transformedObject
+     */
+    realizeTransform: function(object) {
+      this._moveFlippedObject(object);
+      this._setObjectPosition(object);
+      return object;
     },
 
     /**

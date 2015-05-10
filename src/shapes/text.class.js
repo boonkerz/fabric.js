@@ -6,7 +6,8 @@
       extend = fabric.util.object.extend,
       clone = fabric.util.object.clone,
       toFixed = fabric.util.toFixed,
-      supportsLineDash = fabric.StaticCanvas.supports('setLineDash');
+      supportsLineDash = fabric.StaticCanvas.supports('setLineDash'),
+      NUM_FRACTION_DIGITS = fabric.Object.NUM_FRACTION_DIGITS;
 
   if (fabric.Text) {
     fabric.warn('fabric.Text is already defined');
@@ -45,12 +46,12 @@
       fontSize: true,
       fontWeight: true,
       fontFamily: true,
-      textDecoration: true,
       fontStyle: true,
       lineHeight: true,
       stroke: true,
       strokeWidth: true,
-      text: true
+      text: true,
+      textAlign: true
     },
 
     /**
@@ -320,16 +321,20 @@
      * Renders text object on offscreen canvas, so that it would get dimensions
      * @private
      */
-    _initDimensions: function() {
+    _initDimensions: function(ctx) {
       if (this.__skipDimension) {
         return;
       }
-      this._clearCache();
-
-      var ctx = fabric.util.createCanvasElement().getContext('2d');
+      if (!ctx) {
+        ctx = fabric.util.createCanvasElement().getContext('2d');
+        this._setTextStyles(ctx);
+      }
       this._textLines = this.text.split(this._reNewline);
-      this._setTextStyles(ctx);
+      this._clearCache();
+      var currentTextAlign = this.textAlign;
+      this.textAlign = 'left';
       this.width = this._getTextWidth(ctx);
+      this.textAlign = currentTextAlign;
       this.height = this._getTextHeight(ctx);
     },
 
@@ -351,12 +356,7 @@
       this.clipTo && fabric.util.clipContext(this, ctx);
 
       this._renderTextBackground(ctx);
-      this._translateForTextAlign(ctx);
       this._renderText(ctx);
-
-      if (this.textAlign !== 'left' && this.textAlign !== 'justify') {
-        ctx.restore();
-      }
 
       this._renderTextDecoration(ctx);
       this.clipTo && ctx.restore();
@@ -368,13 +368,12 @@
      */
     _renderText: function(ctx) {
       ctx.save();
+      this._translateForTextAlign(ctx);
       this._setOpacity(ctx);
       this._setShadow(ctx);
       this._setupCompositeOperation(ctx);
       this._renderTextFill(ctx);
       this._renderTextStroke(ctx);
-      this._restoreCompositeOperation(ctx);
-      this._removeShadow(ctx);
       ctx.restore();
     },
 
@@ -384,7 +383,6 @@
      */
     _translateForTextAlign: function(ctx) {
       if (this.textAlign !== 'left' && this.textAlign !== 'justify') {
-        ctx.save();
         ctx.translate(this.textAlign === 'center' ? (this.width / 2) : this.width, 0);
       }
     },
@@ -458,13 +456,12 @@
         return;
       }
 
-      var lineWidth = this._getLineWidth(ctx, i),
+      var lineWidth = this._getLineWidth(ctx, lineIndex),
           totalWidth = this.width;
-
-      if (totalWidth > lineWidth) {
+      if (totalWidth >= lineWidth) {
         // stretch the line
         var words = line.split(/\s+/),
-            wordsWidth = ctx.measureText(line.replace(/\s+/g, '')).width,
+            wordsWidth = this._getWidthOfWords(ctx, line, lineIndex),
             widthDiff = totalWidth - wordsWidth,
             numSpaces = words.length - 1,
             spaceWidth = widthDiff / numSpaces,
@@ -478,6 +475,15 @@
       else {
         this._renderChars(method, ctx, line, left, top, lineIndex);
       }
+    },
+
+    /**
+     * @private
+     * @param {CanvasRenderingContext2D} ctx Context to render on
+     * @param {Number} line
+     */
+    _getWidthOfWords: function (ctx, line) {
+      return ctx.measureText(line.replace(/\s+/g, '')).width;
     },
 
     /**
@@ -521,9 +527,6 @@
         );
         lineHeights += heightOfLine;
       }
-      if (this.shadow && !this.shadow.affectStroke) {
-        this._removeShadow(ctx);
-      }
     },
 
     /**
@@ -536,6 +539,10 @@
       }
 
       var lineHeights = 0;
+
+      if (!this.shadow.affectStroke) {
+        this._removeShadow(ctx);
+      }
 
       ctx.save();
 
@@ -653,9 +660,9 @@
      * @private
      */
     _clearCache: function() {
-      this.__lineWidths =  [ ];
-      this.__lineHeights =  [ ];
-      this.__lineOffsets =  [ ];
+      this.__lineWidths = [ ];
+      this.__lineHeights = [ ];
+      this.__lineOffsets = [ ];
     },
 
     /**
@@ -681,8 +688,7 @@
       if (this.__lineWidths[lineIndex]) {
         return this.__lineWidths[lineIndex];
       }
-      this.__lineWidths[lineIndex] = this.textAlign === 'justify' ?
-          this.width : ctx.measureText(this._textLines[lineIndex]).width;
+      this.__lineWidths[lineIndex] = ctx.measureText(this._textLines[lineIndex]).width;
       return this.__lineWidths[lineIndex];
     },
 
@@ -760,25 +766,17 @@
       this._setTextStyles(ctx);
 
       if (this._shouldClearCache()) {
-        this._clearCache();
-        this._textLines = this.text.split(this._reNewline);
-        this.width = this._getTextWidth(ctx);
-        this.height = this._getTextHeight(ctx);
+        this._initDimensions(ctx);
       }
       if (!noTransform) {
         this.transform(ctx);
       }
       this._setStrokeStyles(ctx);
       this._setFillStyles(ctx);
-      var isInPathGroup = this.group && this.group.type === 'path-group';
-
-      if (isInPathGroup) {
-        ctx.translate(-this.group.width/2, -this.group.height/2);
-      }
       if (this.transformMatrix) {
         ctx.transform.apply(ctx, this.transformMatrix);
       }
-      if (isInPathGroup) {
+      if (this.group && this.group.type === 'path-group') {
         ctx.translate(this.left, this.top);
       }
       this._render(ctx);
@@ -904,9 +902,9 @@
         - textTopOffset + height - this.height / 2;
       textSpans.push(
         '<tspan x="',
-          toFixed(textLeftOffset + this._getLineLeftOffset(this.__lineWidths[i]), 4), '" ',
+          toFixed(textLeftOffset + this._getLineLeftOffset(this.__lineWidths[i]), NUM_FRACTION_DIGITS), '" ',
           'y="',
-          toFixed(yPos, 4),
+          toFixed(yPos, NUM_FRACTION_DIGITS),
           '" ',
           // doing this on <tspan> elements since setting opacity
           // on containing <text> one doesn't work in Illustrator
@@ -921,13 +919,13 @@
         '\t\t<rect ',
           this._getFillAttributes(this.textBackgroundColor),
           ' x="',
-          toFixed(textLeftOffset + this._getLineLeftOffset(this.__lineWidths[i]), 4),
+          toFixed(textLeftOffset + this._getLineLeftOffset(this.__lineWidths[i]), NUM_FRACTION_DIGITS),
           '" y="',
-          toFixed(height - this.height / 2, 4),
+          toFixed(height - this.height / 2, NUM_FRACTION_DIGITS),
           '" width="',
-          toFixed(this.__lineWidths[i], 4),
+          toFixed(this.__lineWidths[i], NUM_FRACTION_DIGITS),
           '" height="',
-          toFixed(this._getHeightOfLine(this.ctx, i) / this.lineHeight, 4),
+          toFixed(this._getHeightOfLine(this.ctx, i) / this.lineHeight, NUM_FRACTION_DIGITS),
         '"></rect>\n');
     },
 
@@ -937,13 +935,13 @@
           '\t\t<rect ',
             this._getFillAttributes(this.backgroundColor),
             ' x="',
-            toFixed(-this.width / 2, 4),
+            toFixed(-this.width / 2, NUM_FRACTION_DIGITS),
             '" y="',
-            toFixed(-this.height / 2, 4),
+            toFixed(-this.height / 2, NUM_FRACTION_DIGITS),
             '" width="',
-            toFixed(this.width, 4),
+            toFixed(this.width, NUM_FRACTION_DIGITS),
             '" height="',
-            toFixed(this.height, 4),
+            toFixed(this.height, NUM_FRACTION_DIGITS),
           '"></rect>\n');
       }
     },
@@ -1038,7 +1036,8 @@
     if (!options.originX) {
       options.originX = 'left';
     }
-    var text = new fabric.Text(element.textContent, options),
+    var textContent = element.textContent.replace(/^\s+|\s+$|\n+/g, '').replace(/\s+/g, ' '),
+        text = new fabric.Text(textContent, options),
         /*
           Adjust positioning:
             x/y attributes in SVG correspond to the bottom-left corner of text bounding box

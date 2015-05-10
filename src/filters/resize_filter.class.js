@@ -293,6 +293,20 @@
         }
       }
       return img2;
+    },
+
+    /**
+     * Returns object representation of an instance
+     * @return {Object} Object representation of an instance
+     */
+    toObject: function() {
+      return {
+        type: this.type,
+        scaleX: this.scaleX,
+        scaleY: this.scaleY,
+        resizeType: this.resizeType,
+        lanczosLobes: this.lanczosLobes
+      };
     }
   });
 
@@ -301,8 +315,8 @@
    * @static
    * @return {fabric.Image.filters.Resize} Instance of fabric.Image.filters.Resize
    */
-  fabric.Image.filters.Resize.fromObject = function() {
-    return new fabric.Image.filters.Resize();
+  fabric.Image.filters.Resize.fromObject = function(object) {
+    return new fabric.Image.filters.Resize(object);
   };
 
 })(typeof exports !== 'undefined' ? exports : this);

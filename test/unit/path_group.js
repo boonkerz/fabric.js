@@ -26,7 +26,7 @@
     'clipTo':                   null,
     'backgroundColor':          '',
     'fillRule':                 'nonzero',
-    'globalCompositeOperation': 'source-over',    
+    'globalCompositeOperation': 'source-over',
     'paths':                    getPathObjects()
   };
 
@@ -113,19 +113,15 @@
   asyncTest('toObject', function() {
     getPathGroupObject(function(pathGroup) {
       ok(typeof pathGroup.toObject == 'function');
+
       var object = pathGroup.toObject();
+      ok(typeof object == 'object');
+
       start();
     });
   });
 
   asyncTest('complexity', function() {
-    function sum(objects) {
-      var i = objects.length, total = 0;
-      while (i--) {
-        total += objects[i];
-      }
-      return total;
-    }
     getPathGroupObject(function(pathGroup) {
 
       ok(typeof pathGroup.complexity == 'function');
@@ -231,7 +227,7 @@
       start();
     });
   });
-  
+
   asyncTest('toSVG', function() {
     ok(fabric.PathGroup);
     getPathGroupObject(function(pathGroup) {
@@ -239,6 +235,22 @@
       equal(pathGroup.toSVG(), REFERENCE_PATH_GROUP_SVG);
       pathGroup.transformMatrix = [1, 2, 3, 4, 5, 6];
       equal(pathGroup.toSVG(), REFERENCE_PATH_GROUP_SVG_WITH_MATRIX);
+      start();
+    });
+  });
+
+  asyncTest('toSVGCenterOrigin', function() {
+    ok(fabric.PathGroup);
+    getPathGroupObject(function(pathGroup) {
+      ok(typeof pathGroup.toSVG == 'function');
+      pathGroup.strokeWidth = 0;
+      pathGroup.originX = 'center';
+      pathGroup.originY = 'center';
+      pathGroup.width = 700;
+      pathGroup.height = 600;
+      pathGroup.left = 350;
+      pathGroup.top = 300;
+      equal(pathGroup.toSVG(), REFERENCE_PATH_GROUP_SVG.replace('stroke-width: 1', 'stroke-width: 0'));
       start();
     });
   });

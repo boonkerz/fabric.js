@@ -1,15 +1,11 @@
 {
   "globals": {
-    "ActiveXObject":      true,
-    "define":             true,
-    "eventjs":            true,
-    "exports":            true,
-    "fabric":             true,
+    "fabric":   true,
     "G_vmlCanvasManager": true
   },
-
   "browser":    true,
-  "eqeqeq":     true,
+  // TODO: change to true
+  "eqeqeq":     false,
   "eqnull":     true,
   "evil":       true,
   "expr":       true,
@@ -31,10 +27,5 @@
   "sub":        true,
   "undef":      true,
   "unused":     true,
-
-  "maxdepth":       4,
-  "maxstatements":  45
-
-  // "maxparams":      4,
-  // "maxcomplexity":  7
+  "qunit":      true
 }

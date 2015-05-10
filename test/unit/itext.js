@@ -1,6 +1,11 @@
 (function() {
+  var canvas = this.canvas = new fabric.Canvas();
 
-  QUnit.module('fabric.IText');
+  QUnit.module('fabric.IText', {
+    teardown: function() {
+      canvas.clear();
+    }
+  });
 
   var ITEXT_OBJECT = {
     'type':                     'text',
@@ -37,7 +42,7 @@
     'backgroundColor':          '',
     'textBackgroundColor':      '',
     'fillRule':                 'nonzero',
-    'globalCompositeOperation': 'source-over',    
+    'globalCompositeOperation': 'source-over',
     styles:                     { }
   };
 
@@ -59,7 +64,25 @@
 
   test('instances', function() {
     var iText = new fabric.IText('test');
-    var lastInstance = fabric.IText.instances[fabric.IText.instances.length - 1];
+
+    // Not on a sketchpad; storing it in instances array already would leak it forever.
+    var instances = canvas._iTextInstances && canvas._iTextInstances;
+    var lastInstance = instances && instances[instances.length - 1];
+    equal(lastInstance, undefined);
+
+    canvas.add(iText);
+    instances = canvas._iTextInstances && canvas._iTextInstances;
+    lastInstance = instances && instances[instances.length - 1];
+    equal(lastInstance, iText);
+
+    canvas.remove(iText);
+    instances = canvas._iTextInstances && canvas._iTextInstances;
+    lastInstance = instances && instances[instances.length - 1];
+    equal(lastInstance, undefined);
+
+    // Should survive being added again after removal.
+    canvas.add(iText);
+    lastInstance = canvas._iTextInstances && canvas._iTextInstances[canvas._iTextInstances.length - 1];
     equal(lastInstance, iText);
   });
 
@@ -121,7 +144,7 @@
 
     // 'tes|t'
     iText.selectionStart = iText.selectionEnd = 3;
-    var loc = iText.get2DCursorLocation();
+    loc = iText.get2DCursorLocation();
 
     equal(loc.lineIndex, 0);
     equal(loc.charIndex, 3);
@@ -129,7 +152,7 @@
     // test
     // fo|o
     iText.selectionStart = iText.selectionEnd = 7;
-    var loc = iText.get2DCursorLocation();
+    loc = iText.get2DCursorLocation();
 
     equal(loc.lineIndex, 1);
     equal(loc.charIndex, 2);
@@ -138,7 +161,7 @@
     // foo
     // barba|z
     iText.selectionStart = iText.selectionEnd = 14;
-    var loc = iText.get2DCursorLocation();
+    loc = iText.get2DCursorLocation();
 
     equal(loc.lineIndex, 2);
     equal(loc.charIndex, 5);
@@ -148,7 +171,7 @@
     var iText = new fabric.IText('test');
     ok(iText.isEmptyStyles());
 
-    var iText = new fabric.IText('test', {
+    iText = new fabric.IText('test', {
       styles: {
         0: {
           0: { }
@@ -160,7 +183,7 @@
     });
     ok(iText.isEmptyStyles());
 
-    var iText = new fabric.IText('test', {
+    iText = new fabric.IText('test', {
       styles: {
         0: {
           0: { }

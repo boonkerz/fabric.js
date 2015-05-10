@@ -63,7 +63,6 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
   initCursorSelectionHandlers: function() {
     this.initSelectedHandler();
     this.initMousedownHandler();
-    this.initMousemoveHandler();
     this.initMouseupHandler();
     this.initClicks();
   },
@@ -103,28 +102,6 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
       if (this.isEditing) {
         this.__selectionStartOnMouseDown = this.selectionStart;
         this.initDelayedCursor(true);
-      }
-    });
-  },
-
-  /**
-   * Initializes "mousemove" event handler
-   */
-  initMousemoveHandler: function() {
-    this.on('mousemove', function(options) {
-      if (!this.__isMousedown || !this.isEditing) {
-        return;
-      }
-
-      var newSelectionStart = this.getSelectionStartFromPointer(options.e);
-
-      if (newSelectionStart >= this.__selectionStartOnMouseDown) {
-        this.setSelectionStart(this.__selectionStartOnMouseDown);
-        this.setSelectionEnd(newSelectionStart);
-      }
-      else {
-        this.setSelectionStart(newSelectionStart);
-        this.setSelectionEnd(this.__selectionStartOnMouseDown);
       }
     });
   },
@@ -211,7 +188,7 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
         line;
 
     for (var i = 0, len = this._textLines.length; i < len; i++) {
-      line = this._textLines[i].split('');
+      line = this._textLines[i];
       height += this._getHeightOfLine(this.ctx, i) * this.scaleY;
 
       var widthOfLine = this._getLineWidth(this.ctx, i),
@@ -221,15 +198,15 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
 
       if (this.flipX) {
         // when oject is horizontally flipped we reverse chars
-        this._textLines[i] = line.split('').reverse().join('');
+        // we should reverse also style or do not revers at all.
+        this._textLines[i] = line.reverse().join('');
       }
 
       for (var j = 0, jlen = line.length; j < jlen; j++) {
 
-        var _char = line[j];
         prevWidth = width;
 
-        width += this._getWidthOfChar(this.ctx, _char, i, this.flipX ? jlen - j : j) *
+        width += this._getWidthOfChar(this.ctx, line[j], i, this.flipX ? jlen - j : j) *
                  this.scaleX;
 
         if (height <= mouseOffset.y || width <= mouseOffset.x) {

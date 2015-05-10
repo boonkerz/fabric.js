@@ -192,15 +192,6 @@
      */
 
     /**
-     * Sets object's {@link fabric.Object#angle|angle}
-     * @method setAngle
-     * @memberOf fabric.Object.prototype
-     * @param {Number} value Angle value (in degrees)
-     * @return {fabric.Object} thisArg
-     * @chainable
-     */
-
-    /**
      * Retrieves object's {@link fabric.Object#top|top position}
      * @method getTop
      * @memberOf fabric.Object.prototype
@@ -757,8 +748,8 @@
      * @param {Boolean} fromLeft When true, context is transformed to object's top/left corner. This is used when rendering text on Node
      */
     transform: function(ctx, fromLeft) {
-      if (this.group) {
-        this.group.transform(ctx, fromLeft);
+      if (this.group && this.canvas.preserveObjectStacking && this.group === this.canvas._activeGroup) {
+        this.group.transform(ctx);
       }
       var center = fromLeft ? this._getLeftTopCoords() : this.getCenterPoint();
       ctx.translate(center.x, center.y);
@@ -980,9 +971,6 @@
       }
       this._setStrokeStyles(ctx);
       this._setFillStyles(ctx);
-      if (this.group && this.group.type === 'path-group') {
-        ctx.translate(-this.group.width/2, -this.group.height/2);
-      }
       if (this.transformMatrix) {
         ctx.transform.apply(ctx, this.transformMatrix);
       }
@@ -991,13 +979,12 @@
       this.clipTo && fabric.util.clipContext(this, ctx);
       this._render(ctx, noTransform);
       this.clipTo && ctx.restore();
-      this._removeShadow(ctx);
-      this._restoreCompositeOperation(ctx);
 
       ctx.restore();
     },
 
-    /* @private
+    /**
+     * @private
      * @param {CanvasRenderingContext2D} ctx Context to render on
      */
     _setOpacity: function(ctx) {
@@ -1033,26 +1020,26 @@
      * @param {Boolean} [noTransform] When true, context is not transformed
      */
     _renderControls: function(ctx, noTransform) {
-      var vpt = this.getViewportTransform();
-
-      ctx.save();
-      if (this.active && !noTransform) {
-        var center;
-        if (this.group) {
-          center = fabric.util.transformPoint(this.group.getCenterPoint(), vpt);
-          ctx.translate(center.x, center.y);
-          ctx.rotate(degreesToRadians(this.group.angle));
-        }
-        center = fabric.util.transformPoint(this.getCenterPoint(), vpt, null != this.group);
-        if (this.group) {
-          center.x *= this.group.scaleX;
-          center.y *= this.group.scaleY;
-        }
-        ctx.translate(center.x, center.y);
-        ctx.rotate(degreesToRadians(this.angle));
-        this.drawBorders(ctx);
-        this.drawControls(ctx);
+      if (!this.active || noTransform) {
+        return;
       }
+      var vpt = this.getViewportTransform();
+      ctx.save();
+      var center;
+      if (this.group) {
+        center = fabric.util.transformPoint(this.group.getCenterPoint(), vpt);
+        ctx.translate(center.x, center.y);
+        ctx.rotate(degreesToRadians(this.group.angle));
+      }
+      center = fabric.util.transformPoint(this.getCenterPoint(), vpt, null != this.group);
+      if (this.group) {
+        center.x *= this.group.scaleX;
+        center.y *= this.group.scaleY;
+      }
+      ctx.translate(center.x, center.y);
+      ctx.rotate(degreesToRadians(this.angle));
+      this.drawBorders(ctx);
+      this.drawControls(ctx);
       ctx.restore();
     },
 
@@ -1113,9 +1100,6 @@
         ctx.fill();
       }
       ctx.restore();
-      if (this.shadow && !this.shadow.affectStroke) {
-        this._removeShadow(ctx);
-      }
     },
 
     /**
@@ -1127,7 +1111,12 @@
         return;
       }
 
+      if (!this.shadow.affectStroke) {
+        this._removeShadow(ctx);
+      }
+
       ctx.save();
+
       if (this.strokeDashArray) {
         // Spec requires the concatenation of two copies the dash list when the number of elements is odd
         if (1 & this.strokeDashArray.length) {
@@ -1149,7 +1138,6 @@
         }
         this._stroke ? this._stroke(ctx) : ctx.stroke();
       }
-      this._removeShadow(ctx);
       ctx.restore();
     },
 
@@ -1402,7 +1390,7 @@
 
     /**
      * Sets "angle" of an instance
-     * @param {Number} angle Angle value
+     * @param {Number} angle Angle value (in degrees)
      * @return {fabric.Object} thisArg
      * @chainable
      */
@@ -1487,18 +1475,7 @@
      */
     _setupCompositeOperation: function (ctx) {
       if (this.globalCompositeOperation) {
-        this._prevGlobalCompositeOperation = ctx.globalCompositeOperation;
         ctx.globalCompositeOperation = this.globalCompositeOperation;
-      }
-    },
-
-    /**
-     * Restores previously saved canvas globalCompositeOperation after obeject rendering
-     * @param {CanvasRenderingContext2D} ctx Rendering canvas context
-     */
-    _restoreCompositeOperation: function (ctx) {
-      if (this.globalCompositeOperation && this._prevGlobalCompositeOperation) {
-        ctx.globalCompositeOperation = this._prevGlobalCompositeOperation;
       }
     }
   });
