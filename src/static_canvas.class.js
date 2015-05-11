@@ -1386,8 +1386,21 @@
      * @chainable
      */
     sendToBack: function (object) {
+      var newIdx = 0;
       removeFromArray(this._objects, object);
-      this._objects.unshift(object);
+
+      for (var i = this._objects.length - 1; i >= 0; --i) {
+
+        var obj = this._objects[i];
+
+        if(obj.pos >= 100 ) {
+          newIdx = i;
+        }
+
+      }
+
+
+      this._objects.splice(newIdx, 0, object);
       return this.renderAll && this.renderAll();
     },
 
@@ -1398,8 +1411,20 @@
      * @chainable
      */
     bringToFront: function (object) {
+      var newIdx = 0;
       removeFromArray(this._objects, object);
-      this._objects.push(object);
+
+      for (var i = 0; i < this._objects.length; ++i) {
+
+        var obj = this._objects[i];
+
+        if(obj.pos <= 1000 ) {
+          newIdx = i;
+        }
+
+      }
+
+      this._objects.splice(newIdx, 0, object);
       return this.renderAll && this.renderAll();
     },
 
@@ -1511,6 +1536,19 @@
         }
       }
       else {
+        newIdx = idx;
+
+        // traverse down the stack looking for the nearest intersecting object
+        for (var i = idx + 1; i >= 0; --i) {
+
+          var obj = this._objects[i];
+
+          if(obj.pos <= 1000 ) {
+            newIdx = i;
+            break;
+          }
+
+        }
         newIdx = idx + 1;
       }
 

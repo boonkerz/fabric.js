@@ -5241,13 +5241,27 @@ fabric.Pattern = fabric.util.createClass({
             }
         },
         sendToBack: function(object) {
+            var newIdx = 0;
             removeFromArray(this._objects, object);
-            this._objects.unshift(object);
+            for (var i = this._objects.length - 1; i >= 0; --i) {
+                var obj = this._objects[i];
+                if (obj.pos >= 100) {
+                    newIdx = i;
+                }
+            }
+            this._objects.splice(newIdx, 0, object);
             return this.renderAll && this.renderAll();
         },
         bringToFront: function(object) {
+            var newIdx = 0;
             removeFromArray(this._objects, object);
-            this._objects.push(object);
+            for (var i = 0; i < this._objects.length; ++i) {
+                var obj = this._objects[i];
+                if (obj.pos <= 1e3) {
+                    newIdx = i;
+                }
+            }
+            this._objects.splice(newIdx, 0, object);
             return this.renderAll && this.renderAll();
         },
         sendBackwards: function(object, intersecting) {
@@ -5305,6 +5319,14 @@ fabric.Pattern = fabric.util.createClass({
                     }
                 }
             } else {
+                newIdx = idx;
+                for (var i = idx + 1; i >= 0; --i) {
+                    var obj = this._objects[i];
+                    if (obj.pos <= 1e3) {
+                        newIdx = i;
+                        break;
+                    }
+                }
                 newIdx = idx + 1;
             }
             return newIdx;
@@ -7219,6 +7241,9 @@ fabric.util.object.extend(fabric.StaticCanvas.prototype, {
             if (options.fill && options.fill.colorStops && !(options.fill instanceof fabric.Gradient)) {
                 this.set("fill", new fabric.Gradient(options.fill));
             }
+            if (options.stroke && options.stroke.colorStops && !(options.stroke instanceof fabric.Gradient)) {
+                this.set("stroke", new fabric.Gradient(options.stroke));
+            }
         },
         _initPattern: function(options) {
             if (options.fill && options.fill.source && !(options.fill instanceof fabric.Pattern)) {
@@ -7464,7 +7489,7 @@ fabric.util.object.extend(fabric.StaticCanvas.prototype, {
             if (!this.stroke || this.strokeWidth === 0) {
                 return;
             }
-            if (!this.shadow.affectStroke) {
+            if (this.shadow && !this.shadow.affectStroke) {
                 this._removeShadow(ctx);
             }
             ctx.save();

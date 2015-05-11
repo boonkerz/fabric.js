@@ -9497,8 +9497,21 @@ fabric.Pattern = fabric.util.createClass(/** @lends fabric.Pattern.prototype */ 
      * @chainable
      */
     sendToBack: function (object) {
+      var newIdx = 0;
       removeFromArray(this._objects, object);
-      this._objects.unshift(object);
+
+      for (var i = this._objects.length - 1; i >= 0; --i) {
+
+        var obj = this._objects[i];
+
+        if(obj.pos >= 100 ) {
+          newIdx = i;
+        }
+
+      }
+
+
+      this._objects.splice(newIdx, 0, object);
       return this.renderAll && this.renderAll();
     },
 
@@ -9509,8 +9522,20 @@ fabric.Pattern = fabric.util.createClass(/** @lends fabric.Pattern.prototype */ 
      * @chainable
      */
     bringToFront: function (object) {
+      var newIdx = 0;
       removeFromArray(this._objects, object);
-      this._objects.push(object);
+
+      for (var i = 0; i < this._objects.length; ++i) {
+
+        var obj = this._objects[i];
+
+        if(obj.pos <= 1000 ) {
+          newIdx = i;
+        }
+
+      }
+
+      this._objects.splice(newIdx, 0, object);
       return this.renderAll && this.renderAll();
     },
 
@@ -9622,6 +9647,19 @@ fabric.Pattern = fabric.util.createClass(/** @lends fabric.Pattern.prototype */ 
         }
       }
       else {
+        newIdx = idx;
+
+        // traverse down the stack looking for the nearest intersecting object
+        for (var i = idx + 1; i >= 0; --i) {
+
+          var obj = this._objects[i];
+
+          if(obj.pos <= 1000 ) {
+            newIdx = i;
+            break;
+          }
+
+        }
         newIdx = idx + 1;
       }
 
@@ -13866,6 +13904,9 @@ fabric.util.object.extend(fabric.StaticCanvas.prototype, /** @lends fabric.Stati
       if (options.fill && options.fill.colorStops && !(options.fill instanceof fabric.Gradient)) {
         this.set('fill', new fabric.Gradient(options.fill));
       }
+      if (options.stroke && options.stroke.colorStops && !(options.stroke instanceof fabric.Gradient)) {
+        this.set('stroke', new fabric.Gradient(options.stroke));
+      }
     },
 
     /**
@@ -14278,7 +14319,7 @@ fabric.util.object.extend(fabric.StaticCanvas.prototype, /** @lends fabric.Stati
         return;
       }
 
-      if (!this.shadow.affectStroke) {
+      if (this.shadow && !this.shadow.affectStroke) {
         this._removeShadow(ctx);
       }
 
