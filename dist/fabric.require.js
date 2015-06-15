@@ -12903,6 +12903,7 @@ fabric.util.object.extend(fabric.IText.prototype, {
                 stroke: this.stroke,
                 type: "text"
             }, styleDecl));
+            if (_char.charCodeAt(0) === 0) return;
             return [ '<tspan x="', lineLeftOffset + charOffset, '" y="', lineTopOffset - this.height / 2, '" ', styleDecl.fontFamily ? 'font-family="' + styleDecl.fontFamily.replace(/"/g, "'") + '" ' : "", styleDecl.fontSize ? 'font-size="' + styleDecl.fontSize + '" ' : "", styleDecl.fontStyle ? 'font-style="' + styleDecl.fontStyle + '" ' : "", styleDecl.fontWeight ? 'font-weight="' + styleDecl.fontWeight + '" ' : "", styleDecl.textDecoration ? 'text-decoration="' + styleDecl.textDecoration + '" ' : "", 'style="', fillStyles, '">', fabric.util.string.escapeXml(_char), "</tspan>" ].join("");
         }
     });

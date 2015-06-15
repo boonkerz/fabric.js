@@ -25988,6 +25988,8 @@ fabric.util.object.extend(fabric.IText.prototype, /** @lends fabric.IText.protot
         type: 'text'
       }, styleDecl));
 
+      if(_char.charCodeAt(0) === 0) return;
+
       return [
         //jscs:disable validateIndentation
         '<tspan x="', lineLeftOffset + charOffset, '" y="',

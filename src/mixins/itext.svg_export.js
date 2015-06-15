@@ -99,6 +99,8 @@
         type: 'text'
       }, styleDecl));
 
+      if(_char.charCodeAt(0) === 0) return;
+
       return [
         //jscs:disable validateIndentation
         '<tspan x="', lineLeftOffset + charOffset, '" y="',
