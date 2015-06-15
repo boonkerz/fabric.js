@@ -258,17 +258,6 @@
         }
       }
 
-      if (object.type === 'text' || object.type === 'i-text') {
-        for (prop in coords) {
-          if (prop === 'x1' || prop === 'x2') {
-            coords[prop] -= object.width / 2;
-          }
-          else if (prop === 'y1' || prop === 'y2') {
-            coords[prop] -= object.height / 2;
-          }
-        }
-      }
-
       if (this.type === 'linear') {
         gradient = ctx.createLinearGradient(
           coords.x1, coords.y1, coords.x2, coords.y2);
@@ -299,7 +288,7 @@
     /**
      * Returns {@link fabric.Gradient} instance from an SVG element
      * @static
-     * @memberof fabric.Gradient
+     * @memberOf fabric.Gradient
      * @param {SVGGradientElement} el SVG gradient element
      * @param {fabric.Object} instance
      * @return {fabric.Gradient} Gradient instance
@@ -379,7 +368,7 @@
     /**
      * Returns {@link fabric.Gradient} instance from its object representation
      * @static
-     * @memberof fabric.Gradient
+     * @memberOf fabric.Gradient
      * @param {Object} obj
      * @param {Object} [options] Options object
      */
