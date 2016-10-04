@@ -1,8 +1,11 @@
 (function(){
+  var canvas = fabric.document.createElement('canvas'),
+      ctx = canvas.getContext('2d');
+
   test('event selection:changed firing', function() {
     var iText = new fabric.IText('test need some word\nsecond line'),
         selection = 0;
-
+    iText.ctx = ctx;
     function countSelectionChange() {
       selection++;
     }
@@ -100,7 +103,7 @@
 
     iText.selectionStart = 28;
     iText.selectionEnd = 31;
-    iText.moveCursorUp({ shiftKey: false});
+    iText.moveCursorUp({ shiftKey: false });
     equal(selection, 1, 'should fire');
     equal(iText.selectionStart, 9, 'should move to upper line');
     equal(iText.selectionEnd, 9, 'should move to upper line');
@@ -108,7 +111,7 @@
 
     iText.selectionStart = 1;
     iText.selectionEnd = 4;
-    iText.moveCursorDown({ shiftKey: false});
+    iText.moveCursorDown({ shiftKey: false });
     equal(selection, 1, 'should fire');
     equal(iText.selectionStart, 24, 'should move to down line');
     equal(iText.selectionEnd, 24, 'should move to down line');
@@ -116,7 +119,7 @@
 
     iText.selectionStart = 28;
     iText.selectionEnd = 31;
-    iText.moveCursorLeft({ shiftKey: false});
+    iText.moveCursorLeft({ shiftKey: false });
     equal(selection, 1, 'should fire');
     equal(iText.selectionStart, 28, 'should move to selection Start');
     equal(iText.selectionEnd, 28, 'should move to selection Start');
@@ -133,7 +136,7 @@
   test('moving cursor with shift', function() {
     var iText = new fabric.IText('test need some word\nsecond line'),
         selection = 0;
-
+    iText.ctx = ctx;
     function countSelectionChange() {
       selection++;
     }

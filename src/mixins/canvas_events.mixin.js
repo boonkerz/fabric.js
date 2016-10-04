@@ -1,17 +1,17 @@
 (function() {
 
   var cursorOffset = {
-    mt: 0, // n
-    tr: 1, // ne
-    mr: 2, // e
-    br: 3, // se
-    mb: 4, // s
-    bl: 5, // sw
-    ml: 6, // w
-    tl: 7 // nw
-  },
-  addListener = fabric.util.addListener,
-  removeListener = fabric.util.removeListener;
+        mt: 0, // n
+        tr: 1, // ne
+        mr: 2, // e
+        br: 3, // se
+        mb: 4, // s
+        bl: 5, // sw
+        ml: 6, // w
+        tl: 7 // nw
+      },
+      addListener = fabric.util.addListener,
+      removeListener = fabric.util.removeListener;
 
   fabric.util.object.extend(fabric.Canvas.prototype, /** @lends fabric.Canvas.prototype */ {
 
@@ -43,8 +43,9 @@
       // mouse events
       addListener(this.upperCanvasEl, 'mousedown', this._onMouseDown);
       addListener(this.upperCanvasEl, 'mousemove', this._onMouseMove);
-      addListener(this.upperCanvasEl, 'mousewheel', this._onMouseWheel);
       addListener(this.upperCanvasEl, 'mouseout', this._onMouseOut);
+      addListener(this.upperCanvasEl, 'wheel', this._onMouseWheel);
+      addListener(this.upperCanvasEl, 'contextmenu', this._onContextMenu);
 
       // touch events
       addListener(this.upperCanvasEl, 'touchstart', this._onMouseDown);
@@ -74,6 +75,7 @@
       this._onOrientationChange = this._onOrientationChange.bind(this);
       this._onMouseWheel = this._onMouseWheel.bind(this);
       this._onMouseOut = this._onMouseOut.bind(this);
+      this._onContextMenu = this._onContextMenu.bind(this);
     },
 
     /**
@@ -84,8 +86,9 @@
 
       removeListener(this.upperCanvasEl, 'mousedown', this._onMouseDown);
       removeListener(this.upperCanvasEl, 'mousemove', this._onMouseMove);
-      removeListener(this.upperCanvasEl, 'mousewheel', this._onMouseWheel);
       removeListener(this.upperCanvasEl, 'mouseout', this._onMouseOut);
+      removeListener(this.upperCanvasEl, 'wheel', this._onMouseWheel);
+      removeListener(this.upperCanvasEl, 'contextmenu', this._onContextMenu);
 
       removeListener(this.upperCanvasEl, 'touchstart', this._onMouseDown);
       removeListener(this.upperCanvasEl, 'touchmove', this._onMouseMove);
@@ -119,11 +122,10 @@
 
     /**
      * @private
-     * @param {Event} [e] Event object fired on Event.js wheel event
-     * @param {Event} [self] Inner Event object
+     * @param {Event} [e] Event object fired on wheel event
      */
-    _onMouseWheel: function(e, self) {
-      this.__onMouseWheel && this.__onMouseWheel(e, self);
+    _onMouseWheel: function(e) {
+      this.__onMouseWheel(e);
     },
 
     /**
@@ -162,6 +164,18 @@
      */
     _onLongPress: function(e, self) {
       this.__onLongPress && this.__onLongPress(e, self);
+    },
+
+    /**
+     * @private
+     * @param {Event} e Event object fired on mousedown
+     */
+    _onContextMenu: function (e) {
+      if (this.stopContextMenu) {
+        e.stopPropagation()
+        e.preventDefault();
+      }
+      return false;
     },
 
     /**
@@ -319,7 +333,7 @@
      */
     _handleEvent: function(e, eventType, targetObj) {
       var target = typeof targetObj === undefined ? this.findTarget(e) : targetObj,
-          targets = this.targets || [ ],
+          targets = this.targets || [],
           options = { e: e, target: target, subTargets: targets };
 
       this.fire('mouse:' + eventType, options);
@@ -383,8 +397,7 @@
       if (this.clipTo) {
         fabric.util.clipContext(this, this.contextTop);
       }
-      var ivt = fabric.util.invertTransform(this.viewportTransform),
-          pointer = fabric.util.transformPoint(this.getPointer(e, true), ivt);
+      var pointer = this.getPointer(e);
       this.freeDrawingBrush.onMouseDown(pointer);
       this._handleEvent(e, 'down');
     },
@@ -395,8 +408,7 @@
      */
     _onMouseMoveInDrawingMode: function(e) {
       if (this._isCurrentlyDrawing) {
-        var ivt = fabric.util.invertTransform(this.viewportTransform),
-            pointer = fabric.util.transformPoint(this.getPointer(e, true), ivt);
+        var pointer = this.getPointer(e);
         this.freeDrawingBrush.onMouseMove(pointer);
       }
       this.setCursor(this.freeDrawingCursor);
@@ -426,9 +438,12 @@
      */
     __onMouseDown: function (e) {
 
-      // accept only left clicks
-      var isLeftClick  = 'which' in e ? e.which === 1 : e.button === 0;
-      if (!isLeftClick && !fabric.isTouchSupported) {
+      // if right click just fire events
+      var isRightClick  = 'which' in e ? e.which === 3 : e.button === 2;
+      if (isRightClick) {
+        if (this.fireRightClick) {
+          this._handleEvent(e, 'down', target ? target : null);
+        }
         return;
       }
 
@@ -471,7 +486,7 @@
         }
       }
       this._handleEvent(e, 'down', target ? target : null);
-      // we must renderAll so that active image is placed on the top canvas
+      // we must renderAll so that we update the visuals
       shouldRender && this.renderAll();
     },
 
@@ -590,6 +605,16 @@
     },
 
     /**
+     * Method that defines actions when an Event Mouse Wheel
+     * @param {Event} e Event object fired on mouseup
+     */
+    __onMouseWheel: function(e) {
+      this.fire('mouse:wheel', {
+        e: e
+      });
+    },
+
+    /**
      * @private
      * @param {Event} e Event fired on mousemove
      */
@@ -597,13 +622,13 @@
       var pointer = this.getPointer(e),
           transform = this._currentTransform;
 
-      transform.reset = false,
+      transform.reset = false;
       transform.target.isMoving = true;
 
       this._beforeScaleTransform(e, transform);
       this._performTransformAction(e, transform, pointer);
 
-      this.renderAll();
+      transform.actionPerformed && this.renderAll();
     },
 
     /**
@@ -672,11 +697,13 @@
 
     /**
      * @private
+     * @param {Event} e Event object
+     * @param {Object} transform current tranform
+     * @param {Number} x mouse position x from origin
+     * @param {Number} y mouse poistion y from origin
      * @return {Boolean} true if the scaling occurred
      */
     _onScale: function(e, transform, x, y) {
-      // rotate object only if shift key is not pressed
-      // and if it is not a group we are transforming
       if ((e[this.uniScaleKey] || this.uniScaleTransform) && !transform.target.get('lockUniScaling')) {
         transform.currentAction = 'scale';
         return this._scaleObject(x, y);

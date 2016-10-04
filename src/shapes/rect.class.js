@@ -85,6 +85,7 @@
     /**
      * @private
      * @param {CanvasRenderingContext2D} ctx Context to render on
+     * @param {Boolean} noTransform
      */
     _render: function(ctx, noTransform) {
 
@@ -101,8 +102,8 @@
           x = noTransform ? this.left : -this.width / 2,
           y = noTransform ? this.top : -this.height / 2,
           isRounded = rx !== 0 || ry !== 0,
-          k = 1 - 0.5522847498 /* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */;
-
+          /* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
+          k = 1 - 0.5522847498;
       ctx.beginPath();
 
       ctx.moveTo(x + rx, y);
@@ -247,10 +248,13 @@
    * @static
    * @memberOf fabric.Rect
    * @param {Object} object Object to create an instance from
+   * @param {Function} [callback] Callback to invoke when an fabric.Rect instance is created
    * @return {Object} instance of fabric.Rect
    */
-  fabric.Rect.fromObject = function(object) {
-    return new fabric.Rect(object);
+  fabric.Rect.fromObject = function(object, callback) {
+    var rect = new fabric.Rect(object);
+    callback && callback(rect);
+    return rect;
   };
 
 })(typeof exports !== 'undefined' ? exports : this);

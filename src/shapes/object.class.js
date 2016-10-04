@@ -23,6 +23,7 @@
    * @fires removed
    *
    * @fires selected
+   * @fires deselected
    * @fires modified
    * @fires rotating
    * @fires scaling
@@ -764,7 +765,7 @@
       'top left width height scaleX scaleY flipX flipY originX originY transformMatrix ' +
       'stroke strokeWidth strokeDashArray strokeLineCap strokeLineJoin strokeMiterLimit ' +
       'angle opacity fill fillRule globalCompositeOperation shadow clipTo visible backgroundColor ' +
-      'alignX alignY meetOrSlice skewX skewY'
+      'skewX skewY'
     ).split(' '),
 
     /**
@@ -945,7 +946,7 @@
     /**
      * Basic getter
      * @param {String} property Property name
-     * @return {Any} value of a property
+     * @return {*} value of a property
      */
     get: function(property) {
       return this[property];
@@ -999,7 +1000,7 @@
     /**
      * @private
      * @param {String} key
-     * @param {Any} value
+     * @param {*} value
      * @return {fabric.Object} thisArg
      */
     _set: function(key, value) {
@@ -1023,7 +1024,7 @@
       this[key] = value;
 
       if (key === 'width' || key === 'height') {
-        this.minScaleLimit = Math.min(0.1, 1/Math.max(this.width, this.height));
+        this.minScaleLimit = Math.min(0.1, 1 / Math.max(this.width, this.height));
       }
 
       return this;
@@ -1096,18 +1097,42 @@
       if (!noTransform) {
         this.transform(ctx);
       }
+      this._setOpacity(ctx);
+      this._setShadow(ctx);
+      this._renderBackground(ctx);
       this._setStrokeStyles(ctx);
       this._setFillStyles(ctx);
       if (this.transformMatrix) {
         ctx.transform.apply(ctx, this.transformMatrix);
       }
-      this._setOpacity(ctx);
-      this._setShadow(ctx);
       this.clipTo && fabric.util.clipContext(this, ctx);
       this._render(ctx, noTransform);
       this.clipTo && ctx.restore();
 
       ctx.restore();
+    },
+
+    /**
+     * Draws a background for the object big as its width and height;
+     * @private
+     * @param {CanvasRenderingContext2D} ctx Context to render on
+     */
+    _renderBackground: function(ctx) {
+      if (!this.backgroundColor) {
+        return;
+      }
+
+      ctx.fillStyle = this.backgroundColor;
+
+      ctx.fillRect(
+        -this.width / 2,
+        -this.height / 2,
+        this.width,
+        this.height
+      );
+      // if there is background color no other shadows
+      // should be casted
+      this._removeShadow(ctx);
     },
 
     /**
@@ -1183,7 +1208,7 @@
 
       ctx.save();
       ctx.translate(options.translateX, options.translateY);
-      ctx.lineWidth = 1 / this.borderScaleFactor;
+      ctx.lineWidth = 1 * this.borderScaleFactor;
       ctx.globalAlpha = this.isMoving ? this.borderOpacityWhenMoving : 1;
 
       if (this.group && this.group === this.canvas.getActiveGroup()) {
@@ -1291,7 +1316,8 @@
     },
 
     /**
-     * Clones an instance
+     * Clones an instance, some objects are async, so using callback method will work for every object.
+     * Using the direct return does not work for images and groups.
      * @param {Function} callback Callback is invoked with a clone as a first argument
      * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
      * @return {fabric.Object} clone of an instance
@@ -1306,10 +1332,12 @@
     /**
      * Creates an instance of fabric.Image out of an object
      * @param {Function} callback callback, invoked with an instance as a first argument
+     * @param {Object} [options] for clone as image, passed to toDataURL
+     * @param {Boolean} [options.enableRetinaScaling] enable retina scaling for the cloned image
      * @return {fabric.Object} thisArg
      */
-    cloneAsImage: function(callback) {
-      var dataUrl = this.toDataURL();
+    cloneAsImage: function(callback, options) {
+      var dataUrl = this.toDataURL(options);
       fabric.util.loadImage(dataUrl, function(img) {
         if (callback) {
           callback(new fabric.Image(img));
@@ -1328,6 +1356,7 @@
      * @param {Number} [options.top] Cropping top offset. Introduced in v1.2.14
      * @param {Number} [options.width] Cropping width. Introduced in v1.2.14
      * @param {Number} [options.height] Cropping height. Introduced in v1.2.14
+     * @param {Boolean} [options.enableRetina] Enable retina scaling for clone image. Introduce in 1.6.4
      * @return {String} Returns a data: URL containing a representation of the object in the format specified by options.format
      */
     toDataURL: function(options) {
@@ -1338,10 +1367,8 @@
 
       el.width = boundingRect.width;
       el.height = boundingRect.height;
-
       fabric.util.wrapElement(el, 'div');
-      var canvas = new fabric.StaticCanvas(el);
-
+      var canvas = new fabric.StaticCanvas(el, { enableRetinaScaling: options.enableRetinaScaling });
       // to avoid common confusion https://github.com/kangax/fabric.js/issues/806
       if (options.format === 'jpg') {
         options.format = 'jpeg';

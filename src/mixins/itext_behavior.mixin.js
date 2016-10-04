@@ -398,7 +398,9 @@
         return;
       }
 
-      var newSelectionStart = this.getSelectionStartFromPointer(options.e);
+      var newSelectionStart = this.getSelectionStartFromPointer(options.e),
+          currentStart = this.selectionStart,
+          currentEnd = this.selectionEnd;
       if (newSelectionStart === this.__selectionStartOnMouseDown) {
         return;
       }
@@ -410,9 +412,11 @@
         this.selectionStart = newSelectionStart;
         this.selectionEnd = this.__selectionStartOnMouseDown;
       }
-      this._fireSelectionChanged();
-      this._updateTextarea();
-      this.renderCursorOrSelection();
+      if (this.selectionStart !== currentStart || this.selectionEnd !== currentEnd) {
+        this._fireSelectionChanged();
+        this._updateTextarea();
+        this.renderCursorOrSelection();
+      }
     },
 
     /**
@@ -438,6 +442,7 @@
       if (!this.hiddenTextarea || this.inCompositionMode) {
         return;
       }
+      this.cursorOffsetCache = { };
       this.hiddenTextarea.value = this.text;
       this.hiddenTextarea.selectionStart = this.selectionStart;
       this.hiddenTextarea.selectionEnd = this.selectionEnd;
@@ -490,6 +495,10 @@
       if (p.y > maxHeight) {
         p.y = maxHeight;
       }
+
+      // add canvas offset on document
+      p.x += this.canvas._offset.left;
+      p.y += this.canvas._offset.top;
 
       return { left: p.x + 'px', top: p.y + 'px', fontSize: charHeight };
     },
@@ -819,6 +828,58 @@
      */
     insertNewline: function() {
       this.insertChars('\n');
+    },
+
+    /**
+     * Set the selectionStart and selectionEnd according to the ne postion of cursor
+     * mimic the key - mouse navigation when shift is pressed.
+     */
+    setSelectionStartEndWithShift: function(start, end, newSelection) {
+      if (newSelection <= start) {
+        if (end === start) {
+          this._selectionDirection = 'left';
+        }
+        else if (this._selectionDirection === 'right') {
+          this._selectionDirection = 'left';
+          this.selectionEnd = start;
+        }
+        this.selectionStart = newSelection;
+      }
+      else if (newSelection > start && newSelection < end) {
+        if (this._selectionDirection === 'right') {
+          this.selectionEnd = newSelection;
+        }
+        else {
+          this.selectionStart = newSelection;
+        }
+      }
+      else {
+        // newSelection is > selection start and end
+        if (end === start) {
+          this._selectionDirection = 'right';
+        }
+        else if (this._selectionDirection === 'left') {
+          this._selectionDirection = 'right';
+          this.selectionStart = end;
+        }
+        this.selectionEnd = newSelection;
+      }
+    },
+
+    setSelectionInBoundaries: function() {
+      var length = this.text.length;
+      if (this.selectionStart > length) {
+        this.selectionStart = length;
+      }
+      else if (this.selectionStart < 0) {
+        this.selectionStart = 0;
+      }
+      if (this.selectionEnd > length) {
+        this.selectionEnd = length;
+      }
+      else if (this.selectionEnd < 0) {
+        this.selectionEnd = 0;
+      }
     }
   });
 })();

@@ -493,7 +493,7 @@
     /**
      * Returns requested property
      * @param {String} prop Property to get
-     * @return {Any}
+     * @return {*}
      */
     get: function(prop) {
       if (prop in _lockProperties) {
@@ -524,7 +524,6 @@
    * @memberOf fabric.Group
    * @param {Object} object Object to create a group from
    * @param {Function} [callback] Callback to invoke when an group instance is created
-   * @return {fabric.Group} An instance of fabric.Group
    */
   fabric.Group.fromObject = function(object, callback) {
     fabric.util.enlivenObjects(object.objects, function(enlivenedObjects) {
