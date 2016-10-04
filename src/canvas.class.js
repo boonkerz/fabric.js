@@ -982,6 +982,7 @@
      */
     _checkTarget: function(pointer, obj) {
       if (obj &&
+          obj.selectable &&
           obj.visible &&
           obj.evented &&
           this.containsPoint(null, obj, pointer)){

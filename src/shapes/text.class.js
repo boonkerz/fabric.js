@@ -938,8 +938,22 @@
       var noShadow = true, filter = this.getSvgFilter(),
           style = filter === '' ? '' : ' style="' + filter + '"';
 
+      var uuid = fabric.util.generateUUID();
+ 
+      if (this.clipTo && this.clipTo.type) {
+        markup.push('<clipPath ',
+            'id="canvas-' + uuid + '">');
+        markup.push(this.clipTo.toSVG());
+        markup.push('</clipPath> ');
+      }
+
+      markup.push('\t<g ');
+      if (this.clipTo && this.clipTo.type) {
+        markup.push('clip-path="url(#canvas-' + uuid + ')" ');
+      }
+
       markup.push(
-        '\t<g ', this.getSvgId(), 'transform="', this.getSvgTransform(), this.getSvgTransformMatrix(), '"',
+        this.getSvgId(), 'transform="', this.getSvgTransform(), this.getSvgTransformMatrix(), '"',
           style, '>\n',
           textAndBg.textBgRects.join(''),
           '\t\t<text ',

@@ -92,7 +92,9 @@
         type: 'text',
         getSvgFilter: fabric.Object.prototype.getSvgFilter
       }, styleDecl));
-
+    
+      if(_char.charCodeAt(0) === 0) return;
+      
       return [
         //jscs:disable validateIndentation
         '\t\t\t<tspan x="', toFixed(lineLeftOffset + charOffset, NUM_FRACTION_DIGITS), '" y="',

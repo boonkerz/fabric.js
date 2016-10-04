@@ -112,7 +112,7 @@
             'r="', this.radius,
             '" style="', this.getSvgStyles(),
             '" transform="', this.getSvgTransform(),
-            ' ', this.getSvgTransformMatrix(),
+            this.getSvgTransformMatrix(),
           '"/>\n'
         );
       }

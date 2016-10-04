@@ -122,7 +122,7 @@
           'points="', points.join(''),
           '" style="', this.getSvgStyles(),
           '" transform="', this.getSvgTransform(), addTransform,
-          ' ', this.getSvgTransformMatrix(),
+          this.getSvgTransformMatrix(),
         '"/>\n'
       );
 
